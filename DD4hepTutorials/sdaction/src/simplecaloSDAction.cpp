@@ -123,6 +123,7 @@ namespace sim {
     if (std::abs(localPosition.x()) > 30. || std::abs(localPosition.y()) > 30.) {
       return true;
     }
+    // end of Hands-on 5
     */
 
     // Create the hits and accumulate contributions from multiple steps
@@ -135,11 +136,35 @@ namespace sim {
       hit->cellID = VolID; // this should be assigned only once
       // we divide the coordinated by 10 to save them as cm
       Position HitCellPos(CellPos.x() / 10, CellPos.y() / 10, CellPos.z() / 10);
-      hit->position = CellPos; // this should be assigned only once
+      hit->position = HitCellPos; // this should be assigned only once
       hit->energyDeposit = aStep->GetTotalEnergyDeposit();
+
+      // Hands-on 6: add calo hit contributions
+      //
+      // Crete the first contribution associated to this hit
+      /*Geant4Calorimeter::Hit::Contribution contrib;
+      contrib.trackID = aStep->GetTrack()->GetTrackID();
+      contrib.deposit = aStep->GetTotalEnergyDeposit();
+      contrib.time = aStep->GetPreStepPoint()->GetGlobalTime();
+      contrib.x = HitCellPos.x(); contrib.y = HitCellPos.y(); contrib.z = HitCellPos.z();
+      hit->truth.emplace_back(contrib);*/
+      // end on Hands-on 6
+
       coll->add(VolID, hit); // add the hit to the hit collection
     } else {                 // if the hit exists already, increment its fields
       hit->energyDeposit += aStep->GetTotalEnergyDeposit();
+
+      // Hands-on 6: add calo hit contributions
+      //
+      // Add a new contribution associated to this hit
+      /*Geant4Calorimeter::Hit::Contribution contrib;
+      contrib.trackID = aStep->GetTrack()->GetTrackID();
+      contrib.deposit = aStep->GetTotalEnergyDeposit();
+      contrib.time = aStep->GetPreStepPoint()->GetGlobalTime();
+      Position HitCellPos(CellPos.x() / 10, CellPos.y() / 10, CellPos.z() / 10);
+      contrib.x = HitCellPos.x(); contrib.y = HitCellPos.y(); contrib.z = HitCellPos.z();
+      hit->truth.emplace_back(contrib);*/
+      // end on Hands-on 6
     }
 
     return true;
