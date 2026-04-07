@@ -17,6 +17,10 @@
  * limitations under the License.
  */
 
+// This is Hands-on 6, a more complex analysis for simplecalo2
+// Follow the code and complete the six questions along the code.
+// Solutions and at the end of this file.
+
 // load required libraries for ROOT interpreter
 R__LOAD_LIBRARY(libDDCore.so)
 R__LOAD_LIBRARY(libpodio.so)
