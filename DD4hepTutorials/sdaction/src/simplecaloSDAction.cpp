@@ -139,32 +139,36 @@ namespace sim {
       hit->position = HitCellPos; // this should be assigned only once
       hit->energyDeposit = aStep->GetTotalEnergyDeposit();
 
-      // Hands-on 6: add calo hit contributions
+      // Add calo hit contributions
       //
       // Crete the first contribution associated to this hit
-      /*Geant4Calorimeter::Hit::Contribution contrib;
+      Geant4Calorimeter::Hit::Contribution contrib;
       contrib.trackID = aStep->GetTrack()->GetTrackID();
+      contrib.pdgID = aStep->GetTrack()->GetParticleDefinition()->GetPDGEncoding();
       contrib.deposit = aStep->GetTotalEnergyDeposit();
       contrib.time = aStep->GetPreStepPoint()->GetGlobalTime();
-      contrib.x = HitCellPos.x(); contrib.y = HitCellPos.y(); contrib.z = HitCellPos.z();
-      hit->truth.emplace_back(contrib);*/
-      // end on Hands-on 6
+      contrib.x = HitCellPos.x();
+      contrib.y = HitCellPos.y();
+      contrib.z = HitCellPos.z();
+      hit->truth.emplace_back(contrib);
 
       coll->add(VolID, hit); // add the hit to the hit collection
     } else {                 // if the hit exists already, increment its fields
       hit->energyDeposit += aStep->GetTotalEnergyDeposit();
 
-      // Hands-on 6: add calo hit contributions
+      // Add calo hit contributions
       //
       // Add a new contribution associated to this hit
-      /*Geant4Calorimeter::Hit::Contribution contrib;
+      Geant4Calorimeter::Hit::Contribution contrib;
       contrib.trackID = aStep->GetTrack()->GetTrackID();
+      contrib.pdgID = aStep->GetTrack()->GetParticleDefinition()->GetPDGEncoding();
       contrib.deposit = aStep->GetTotalEnergyDeposit();
       contrib.time = aStep->GetPreStepPoint()->GetGlobalTime();
       Position HitCellPos(CellPos.x() / 10, CellPos.y() / 10, CellPos.z() / 10);
-      contrib.x = HitCellPos.x(); contrib.y = HitCellPos.y(); contrib.z = HitCellPos.z();
-      hit->truth.emplace_back(contrib);*/
-      // end on Hands-on 6
+      contrib.x = HitCellPos.x();
+      contrib.y = HitCellPos.y();
+      contrib.z = HitCellPos.z();
+      hit->truth.emplace_back(contrib);
     }
 
     return true;
