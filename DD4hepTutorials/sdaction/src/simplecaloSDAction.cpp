@@ -52,6 +52,7 @@ namespace sim {
   template <>
   void Geant4SensitiveAction<simplecaloSDData>::initialize() {
     m_userData.sensitive = this;
+    m_hitCreationMode = HitCreationFlags::DETAILED_MODE;
   }
 
   // Function template specialization of Geant4SensitiveAction class.
