@@ -21,7 +21,7 @@ limitations under the License.
 This repository hosts tutorials for using the *Gaudi* software as part of the larger *key4hep* ecosystem.
 
 It contains hands-on exercises to get familiar with Gaudi steering files and algorithms.
-To experiment with the tutorial, you can follow this presentation at the 4th DRD-Calo Collaboration Meeting, which covers the *EventStats*, *RandomNoiseDigitizer*, and *MoliereRadius* exercises.
+To experiment with the tutorial, you can follow [this presentation](https://indico.cern.ch/event/1551941/sessions/613344/#20250918) at the 4th DRD-Calo Collaboration Meeting, which covers the *EventStats*, *RandomNoiseDigitizer*, and *MoliereRadius* exercises.
 
 This README contains a short description for each of the hosted exercises.
 The exercises run on data that has been created with with the *simplecalo* calorimeter from the **DD4hepTutorials** exercises.
