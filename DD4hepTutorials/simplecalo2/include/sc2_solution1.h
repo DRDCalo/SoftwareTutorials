@@ -22,12 +22,30 @@ CellVol.setVisAttributes(description, x_cell.visStr());
 // Make the cell sensitive
 if (iscellsens)
   CellVol.setSensitiveDetector(sens);
-double x, y = 0;
-for (std::size_t i = 0; i < 10; i++) {
-  y = SensLayerY / 2. - CellY / 2. - i * CellY;
-  for (std::size_t j = 0; j < 10; j++) {
-    x = -SensLayerX / 2. + CellX / 2. + j * CellX;
-    PlacedVolume CellVolPlaced = SensLayerVol.placeVolume(CellVol, 10 * i + j, Position(x, y, 0.));
-    CellVolPlaced.addPhysVolID("cellid", 10 * i + j);
+
+// How many cells fit into the sensitive layer follows from the XML dimensions, so
+// changing CellX/CellY or SensLayerX/SensLayerY in simplecalo2.xml is enough and
+// this code does not have to be touched.
+const int NCellsX = static_cast<int>(std::round(SensLayerX / CellX));
+const int NCellsY = static_cast<int>(std::round(SensLayerY / CellY));
+
+// Refuse a geometry that would be silently wrong. Cells that do not tile the layer
+// leave part of it uncovered, and the cellid field of the readout is 10 bits wide
+// (see <id> in simplecalo2.xml), so beyond 1024 cells two of them share an address.
+if (std::abs(NCellsX * CellX - SensLayerX) > 1e-6 || std::abs(NCellsY * CellY - SensLayerY) > 1e-6)
+  except("simplecalo2", "Cells do not tile the sensitive layer: %g/%g and %g/%g must be whole numbers.", SensLayerX,
+         CellX, SensLayerY, CellY);
+if (NCellsX * NCellsY > 1024)
+  except("simplecalo2", "%d x %d cells do not fit the 10-bit cellid field, which holds 1024.", NCellsX, NCellsY);
+
+// The outer loop runs over y and the inner one over x, hence cellid = NCellsX * iY + iX.
+// The analysis has to use the same convention to turn a cellid back into a cell position.
+for (int iY = 0; iY < NCellsY; iY++) {
+  const double y = SensLayerY / 2. - CellY / 2. - iY * CellY;
+  for (int iX = 0; iX < NCellsX; iX++) {
+    const double x = -SensLayerX / 2. + CellX / 2. + iX * CellX;
+    const int cellid = NCellsX * iY + iX;
+    PlacedVolume CellVolPlaced = SensLayerVol.placeVolume(CellVol, cellid, Position(x, y, 0.));
+    CellVolPlaced.addPhysVolID("cellid", cellid);
   }
 }

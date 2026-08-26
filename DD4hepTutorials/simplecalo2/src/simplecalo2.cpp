@@ -20,6 +20,8 @@
 // Includers from DD4hep
 #include "DDRec/Vector3D.h"
 #include <DD4hep/DetFactoryHelper.h>
+#include <DD4hep/Printout.h> // dd4hep::except, used by sc2_solution1.h
+#include <cmath>             // std::round and std::abs, likewise
 
 using namespace dd4hep;
 

@@ -18,6 +18,11 @@ limitations under the License.
 ]]
 CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 
+# DD4hep 1.36 still uses CMake's FindBoost module. Keep that compatibility
+# mode explicitly on CMake 3.30+ instead of emitting a CMP0167 developer warning.
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 OLD)
+endif()
 
 project(SoftwareTutorials LANGUAGES CXX)
 

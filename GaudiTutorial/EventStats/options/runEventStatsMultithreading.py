@@ -16,6 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from drdcalo_tutorials import gaudi_output, sample_input
+
 from Gaudi.Configuration import INFO
 from k4FWCore import IOSvc, ApplicationMgr
 from Configurables import EventDataSvc, AuditorSvc, ChronoAuditor, HiveWhiteBoard, HiveSlimEventLoopMgr, AvalancheSchedulerSvc
@@ -27,8 +29,10 @@ slimeventloopmgr = HiveSlimEventLoopMgr("HiveSlimEventLoopMgr")
 scheduler = AvalancheSchedulerSvc(ThreadPoolSize=threads)
 
 io_svc = IOSvc("IOSvc")
-io_svc.Input =  "../../data/simpleCalo_simulation.root"
-io_svc.Output = "../../data/simpleCalo_eventStats.root"
+io_svc.Input = sample_input()
+# Its own output names, so that running this next to runEventStatsSolution.py
+# compares the two results instead of overwriting one with the other.
+io_svc.Output = gaudi_output("simpleCalo_eventStats_multithreaded.root")
 
 chra = ChronoAuditor()
 audsvc = AuditorSvc()
@@ -41,6 +45,7 @@ eventStats_functional = EventStats("EventStats",
     OutputEnergyBarycentre = ["EnergyBarycentreX", "EnergyBarycentreY", "EnergyBarycentreZ"],
     OutputTotalEnergy = ["TotalEnergy"],
     SaveHistograms = True,
+    HistogramFile = gaudi_output("debugEventStats_multithreaded.root"),
     OutputLevel = INFO
 )
 
