@@ -17,17 +17,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ]]
 
+set(SIM_FILE ${PROJECT_SOURCE_DIR}/DD4hepTutorials/data/simplecalo2_sample.root)
+if(NOT EXISTS ${SIM_FILE})
+    message(FATAL_ERROR "Bundled tutorial input not found: ${SIM_FILE}")
+endif()
+
 add_test(NAME test_EventStats
                 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                COMMAND k4run GaudiTutorial/EventStats/options/runEventStatsSolution.py --IOSvc.Input ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root --IOSvc.Output ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_eventStats.root)
+                COMMAND k4run GaudiTutorial/EventStats/options/runEventStatsSolution.py --IOSvc.Input ${SIM_FILE} --IOSvc.Output ${CMAKE_CURRENT_BINARY_DIR}/simpleCalo_eventStats.root)
 
 add_test(NAME test_MoliereRadius
                 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                COMMAND k4run GaudiTutorial/MoliereRadiusFunctional/options/runMoliereRadiusSolution.py --IOSvc.Input ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root --IOSvc.Output ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_moliereRadius.root)
+                COMMAND k4run GaudiTutorial/MoliereRadiusFunctional/options/runMoliereRadiusSolution.py --IOSvc.Input ${SIM_FILE} --IOSvc.Output ${CMAKE_CURRENT_BINARY_DIR}/simpleCalo_moliereRadius.root)
 
 add_test(NAME test_RandomNoiseDigitizer
                 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                COMMAND k4run GaudiTutorial/RandomNoiseDigitizer/options/runRandomNoiseDigitizerSolution.py --IOSvc.Input ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root --IOSvc.Output ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_noiseDigitizer.root)
+                COMMAND k4run GaudiTutorial/RandomNoiseDigitizer/options/runRandomNoiseDigitizerSolution.py --IOSvc.Input ${SIM_FILE} --IOSvc.Output ${CMAKE_CURRENT_BINARY_DIR}/simpleCalo_noiseDigitizer.root)
 
 # For LD_LIBRARY_PATH
 # ${PROJECT_BINARY_DIR}                                         # The files <plugins>.components and <plugins>.confdb are here
@@ -46,20 +51,41 @@ add_test(NAME test_RandomNoiseDigitizer
 # https://github.com/key4hep/k4FWCore/blob/42497b71c23425a3a26648f30a1285a499dcda28/test/k4FWCoreTest/CMakeLists.txt#L71
 
 
-execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
-    ${PROJECT_SOURCE_DIR}/GaudiTutorial/data)
+# Smoke test for the DD4hep analysis script. It runs on the same example file as the Gaudi
+# exercises, which carries the same simplecaloRO collection. The script writes its PNG next
+# to the input, so operate on a copy inside the build tree.
+if(EXISTS ${SIM_FILE})
+    set(PLOT_INPUT ${CMAKE_CURRENT_BINARY_DIR}/plot_cell_energy_sum_input.root)
+    configure_file(${SIM_FILE} ${PLOT_INPUT} COPYONLY)
 
-set(SIM_FILE ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root)
+    add_test(NAME test_PlotCellEnergySumPython
+                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                    COMMAND python ${PROJECT_SOURCE_DIR}/DD4hepTutorials/scripts/plot_cell_energy_sum.py ${PLOT_INPUT})
 
-if(NOT EXISTS ${SIM_FILE})
-    message(STATUS "Downloading simpleCalo_simulation.root ...")
-    execute_process(
-        COMMAND wget -O ${SIM_FILE} https://fccsw.web.cern.ch/fccsw/tutorials/DRD6_2025_Ancona/simpleCalo_simulation.root
-    )
 else()
-    message(STATUS "File already exists: ${SIM_FILE}, skipping download.")
+    message(WARNING "${SIM_FILE} not available, skipping the DD4hep analysis script test.")
 endif()
 
+# Check that every notebook is well formed and that its code cells are valid Python.
+add_test(NAME test_NotebooksValid
+                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/check_notebooks.py)
+
+# Execute the solution notebook against the bundled sample by default. Developers can still
+# override SIMPLECALO2_FILE at configure time to exercise a full simulation output.
+if(NOT DEFINED SIMPLECALO2_FILE)
+    set(SIMPLECALO2_FILE
+        ${PROJECT_SOURCE_DIR}/DD4hepTutorials/data/simplecalo2_sample.root)
+endif()
+if(NOT EXISTS ${SIMPLECALO2_FILE})
+    message(FATAL_ERROR "EDM4hep notebook input not found: ${SIMPLECALO2_FILE}")
+endif()
+
+add_test(NAME test_ReadEdm4hepNotebook
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                COMMAND jupyter nbconvert --to notebook --execute
+                        ${PROJECT_SOURCE_DIR}/DD4hepTutorials/notebooks/readEdm4hepSolution.ipynb
+                        --output ${CMAKE_CURRENT_BINARY_DIR}/readEdm4hepSolution_executed.ipynb)
 
 get_filename_component(CURRENT_DIR_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 
@@ -75,6 +101,7 @@ ${CMAKE_CURRENT_BINARY_DIR}/genConfDir/${CURRENT_DIR_NAME}:\
 $ENV{LD_LIBRARY_PATH};\
 \
 PYTHONPATH=\
+${PROJECT_SOURCE_DIR}/python:\
 ${PROJECT_BINARY_DIR}/GaudiTutorial/EventStats/genConfDir:\
 ${PROJECT_BINARY_DIR}/GaudiTutorial/MoliereRadiusFunctional/genConfDir:\
 ${PROJECT_BINARY_DIR}/GaudiTutorial/RandomNoiseDigitizer/genConfDir:\
@@ -84,6 +111,12 @@ $ENV{PYTHONPATH};\
 ")
 get_property(test_names DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY TESTS)
 set_tests_properties(${test_names} PROPERTIES ENVIRONMENT "${test_environment}")
+
+# Must come after set_tests_properties() above, which would otherwise overwrite it.
+if(TEST test_ReadEdm4hepNotebook)
+    set_property(TEST test_ReadEdm4hepNotebook APPEND PROPERTY
+                 ENVIRONMENT "SIMPLECALO2_FILE=${SIMPLECALO2_FILE}")
+endif()
 
 message(STATUS "================ Test Environment ================")
 message(STATUS "${test_environment}")

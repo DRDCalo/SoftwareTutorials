@@ -17,6 +17,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ]]
 CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
+
+# DD4hep 1.36 still relies on CMake's legacy FindBoost compatibility mode.
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 OLD)
+endif()
+
 project(DD4hepTutorials)
 
 include(GNUInstallDirs)

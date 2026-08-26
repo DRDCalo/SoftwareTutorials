@@ -22,12 +22,22 @@ CellVol.setVisAttributes(description, x_cell.visStr());
 // Make the cell sensitive
 if (iscellsens)
   CellVol.setSensitiveDetector(sens);
-double x, y = 0;
-for (std::size_t i = 0; i < 10; i++) {
-  y = SensLayerY / 2. - CellY / 2. - i * CellY;
-  for (std::size_t j = 0; j < 10; j++) {
-    x = -SensLayerX / 2. + CellX / 2. + j * CellX;
-    PlacedVolume CellVolPlaced = SensLayerVol.placeVolume(CellVol, 10 * i + j, Position(x, y, 0.));
-    CellVolPlaced.addPhysVolID("cellid", 10 * i + j);
+
+// How many cells fit into the sensitive layer follows from the XML dimensions,
+// so changing CellX/CellY or SensLayerX/SensLayerY in simplecalo2.xml is enough
+// and this code does not have to be touched. Careful though: the cellid field of
+// the readout is 10 bits wide, so at most 1024 cells per layer can be encoded.
+const std::size_t NCellsX = static_cast<std::size_t>(SensLayerX / CellX);
+const std::size_t NCellsY = static_cast<std::size_t>(SensLayerY / CellY);
+
+// The outer loop runs over y and the inner one over x, hence cellid = NCellsX * iY + iX.
+// The analysis has to use the same convention to turn a cellid back into a cell position.
+for (std::size_t iY = 0; iY < NCellsY; iY++) {
+  const double y = SensLayerY / 2. - CellY / 2. - iY * CellY;
+  for (std::size_t iX = 0; iX < NCellsX; iX++) {
+    const double x = -SensLayerX / 2. + CellX / 2. + iX * CellX;
+    const std::size_t cellid = NCellsX * iY + iX;
+    PlacedVolume CellVolPlaced = SensLayerVol.placeVolume(CellVol, cellid, Position(x, y, 0.));
+    CellVolPlaced.addPhysVolID("cellid", cellid);
   }
 }

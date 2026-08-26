@@ -16,13 +16,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import inspect
+import os
+
+# Directory of this steering file, so that ddsim can be launched from anywhere.
+# ddsim runs this file through exec() without defining __file__, hence inspect.
+_HERE = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+
 from DDSim.DD4hepSimulation import DD4hepSimulation
 from g4units import mm, m, cm, GeV, MeV
 SIM = DD4hepSimulation()
 
 
 ## The compact XML file, or multiple compact files, if the last one is the closer.
-SIM.compactFile = ["simplecalo2/compact/simplecalo2.xml"]
+SIM.compactFile = [os.path.join(_HERE, "compact", "simplecalo2.xml")]
 ## Lorentz boost for the crossing angle, in radian!
 SIM.crossingAngleBoost = 0.0
 SIM.enableDetailedShowerMode = False
@@ -37,7 +44,7 @@ SIM.macroFile = ""
 ## number of events to simulate, used in batch mode
 SIM.numberOfEvents = 500
 ## Outputfile from the simulation: .slcio, edm4hep.root and .root output files are supported
-SIM.outputFile = "simplecalo.root"
+SIM.outputFile = "simplecalo2.root"
 ## Physics list to use in simulation
 SIM.physicsList = None
 ## Verbosity use integers from 1(most) to 7(least) verbose

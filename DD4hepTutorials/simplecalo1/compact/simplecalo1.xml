@@ -95,6 +95,9 @@
        grid_size_x="10*cm"
        grid_size_y="10*cm"/>
       <!-- NO SPACES BETWEEN ID DESCRIPTORS!!! -->
+      <!-- "abslayer" is a single bit distinguishing the two sub-layers of a CaloLayer:
+           1 for the absorber, 0 for the sensitive layer. Only the sensitive layer is
+           read out, so every hit carries abslayer=0. -->
       <id>calolayer:5,abslayer:1,x:-10,y:-10</id>
     </readout>
   </readouts>

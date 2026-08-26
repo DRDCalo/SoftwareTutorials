@@ -30,6 +30,7 @@
 #include "edm4hep/CalorimeterHitCollection.h"
 
 // STL
+#include <algorithm> // std::sort
 #include <cmath>
 #include <string>
 #include <vector>

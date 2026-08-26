@@ -16,7 +16,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-# GaudiTutorials for DRD6
+# GaudiTutorials for DRDCalo
 
 This repository hosts tutorials for using the *Gaudi* software as part of the larger *key4hep* ecosystem.
 
@@ -24,15 +24,21 @@ It contains hands-on exercises to get familiar with Gaudi steering files and alg
 To experiment with the tutorial, you can follow [this presentation](https://indico.cern.ch/event/1551941/sessions/613344/#20250918) at the 4th DRD-Calo Collaboration Meeting, which covers the *EventStats*, *RandomNoiseDigitizer*, and *MoliereRadius* exercises.
 
 This README contains a short description for each of the hosted exercises.
-The exercises run on data that has been created with with the *simplecalo* calorimeter from the **DD4hepTutorials** exercises.
-An example data file will be downloaded automatically when compiling the repository.
+The exercises run on data that has been created with the *simplecalo* calorimeter from the **DD4hepTutorials** exercises.
+No data download is required: the steering files call
+`drdcalo_tutorials.sample_input()`, the bundled 10-event
+`DD4hepTutorials/data/simplecalo2_sample.root`, and write through
+`drdcalo_tutorials.gaudi_output("<name>.root")` into `GaudiTutorial/data/`. Both can be
+overridden on the command line with `--IOSvc.Input` and `--IOSvc.Output`, so a full
+`simplecalo2.root` from the DD4hep tutorial can be analysed with
+`k4run <options.py> --IOSvc.Input DD4hepTutorials/simplecalo2.root`.
 
 ## EventStats
 
 The goal of this exercise is to become familiar with the Gaudi steering file.
 For this purpose, an EventStats algorithm is provided, which saves the energy barycentre and total energy for each event using the `podio::UserDataCollection`.
 
-You should adapt the steering file `runEventStats.py` in the `EventStats/options' folder such that this algorithm is executed on the data.
+You should adapt the steering file `runEventStats.py` in the `EventStats/options` folder such that this algorithm is executed on the data.
 A solution file is provided.
 
 ## RandomNoiseDigitizer

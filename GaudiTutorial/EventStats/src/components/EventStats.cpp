@@ -27,6 +27,7 @@
 
 // STL
 #include <cmath>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -134,7 +135,6 @@ public:
 
       barycentre_x += x * energy;
       barycentre_y += y * energy;
-      barycentre_y += y * energy;
       barycentre_z += z * energy;
       totalEnergy += energy;
 
@@ -164,15 +164,23 @@ public:
         min_pos_z = z;
     }
 
-    barycentre_x /= totalEnergy;
-    barycentre_y /= totalEnergy;
-    barycentre_z /= totalEnergy;
+    // An event without any energy deposit has no barycentre: dividing here would
+    // hand NaN to every downstream algorithm.
+    if (totalEnergy > 0.0) {
+      barycentre_x /= totalEnergy;
+      barycentre_y /= totalEnergy;
+      barycentre_z /= totalEnergy;
+    }
 
     /////////////////////////////////////////
     //// SAVE HISTOGRAMS OF ENERGY STATS ////
     /////////////////////////////////////////
 
-    if (m_saveHisto) {
+    if (m_saveHisto && totalEnergy > 0.0) {
+      // operator() is const and the Avalanche scheduler calls it from several
+      // threads at once (see runEventStatsMultithreading.py). TH1::Fill is not
+      // thread safe, so the shared histograms have to be protected.
+      std::scoped_lock lock(m_histoMutex);
       hTotalEnergy->Fill(totalEnergy);
       hMaxEnergy->Fill(maxEnergy);
       hMinEnergy->Fill(minEnergy);
@@ -239,9 +247,11 @@ public:
 private:
   Gaudi::Property<bool> m_saveHisto{this, "SaveHistograms", false, "flag to save histograms"};
 
-  TH1D* hTotalEnergy;
-  TH1D* hMaxEnergy;
-  TH1D* hMinEnergy;
+  mutable std::mutex m_histoMutex;
+
+  TH1D* hTotalEnergy = nullptr;
+  TH1D* hMaxEnergy = nullptr;
+  TH1D* hMinEnergy = nullptr;
 };
 
 DECLARE_COMPONENT(EventStats)

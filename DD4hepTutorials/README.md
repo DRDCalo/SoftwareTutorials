@@ -31,4 +31,93 @@ For instructions on **simplecalo1** and **simplecalo2** follow [this presentatio
 - April 2026, DRDCalo Collaboration Meeting [presentation](https://indico.cern.ch/event/1618975/sessions/635708/attachments/3252510/5805581/DRDCaloDD4hepTutorial_April2026.pdf)
 - April 2025, DRDCalo Collaboration Meeting [presentation](https://indico.ijclab.in2p3.fr/event/11400/sessions/5873/attachments/25413/37372/DRD6DD4hepTutorial_April2025.pdf)
 
+## Analysing the output
+
+All analysis code is Python:
+
+| What | Where | How to run |
+|---|---|---|
+| Section 1: total cell energy and resolution fit | `scripts/plot_cell_energy_sum.py` | `python scripts/plot_cell_energy_sum.py simplecalo1.root` |
+| Hands-on 6: hits, layers, lateral shape, contributions | `notebooks/readEdm4hep.ipynb` | open in Jupyter or VS Code |
+
+Hands-on 6 is a notebook with six questions to complete. The finished version sits next to it as
+`notebooks/readEdm4hepSolution.ipynb`. A deterministic 10-event input file is included as
+`data/simplecalo2_sample.root`, so both notebooks work directly after cloning. If the full
+`simplecalo2.root` produced by `ddsim --steeringFile simplecalo2/sc2SteeringFile.py` exists in
+this directory, the notebooks prefer it automatically. Set `SIMPLECALO2_FILE` to use another
+compatible EDM4hep ROOT file. That choice is made by `drdcalo_tutorials.simplecalo2_input()`,
+which the Gaudi exercises use as well.
+
+### Running the notebook
+
+Uproot reads the EDM4hep ROOT file, DD4hep's native bit-field decoder interprets cell IDs,
+Awkward Array and NumPy process the data, and Matplotlib draws the results. The analysis does not
+use ROOT histograms or canvases. `setup.sh` in the top directory of the repository provides these
+packages, registers a Jupyter kernel, and exports the repository location used to find the sample;
+see the main README.
+
+In **VS Code with Remote-SSH**, open `SoftwareTutorials` itself as the workspace folder — not a
+parent directory — then choose **Select Kernel** → **Python Environments** and pick
+`.venv/bin/python`. VS Code applies `${workspaceFolder}/.env`, which `setup.sh` fills with the
+key4hep runtime, and that is what makes `uproot`, `dd4hep` and the rest importable.
+
+If the notebook fails with `No module named 'awkward'`, or VS Code offers to install packages,
+the environment file was not applied — almost always because the workspace folder is a level
+above the repository. See the main README for the `python.envFile` setting that fixes that
+without moving the workspace.
+
+To use JupyterLab instead, start it from a shell in which `setup.sh` has been sourced and forward
+its port the same way as for the geometry viewer below:
+
+``` bash
+jupyter lab --no-browser --port 8888
+```
+
+The plots are ordinary Matplotlib figures displayed directly in the notebook.
+
+## Viewing the geometry
+
+`geoWebDisplay simplecalo1/compact/simplecalo1.xml` starts a small web server and asks the
+operating system to open a browser on it. If a browser window appears, you are done.
+
+If nothing appears, the server is still running and only the browser launch failed. This is the
+normal case on a remote machine or inside a container, where `xdg-open` is often missing. Look
+for this line in the output:
+
+```
+Info in <THttpEngine::Create>: Starting HTTP server on port 127.0.0.1:8090
+```
+
+Leave the `root [0]` prompt open, since quitting it stops the server, and forward that port to
+your own machine:
+
+``` bash
+# in a terminal on your laptop. Use the exact node name: lxplus.cern.ch is load balanced
+# and would send you to a different machine, where nothing is listening.
+ssh -N -L 8090:127.0.0.1:8090 <user>@lxplus8sXX.cern.ch
+```
+
+Then browse to **<http://localhost:8090/win1/>**. In VS Code with Remote-SSH the `ssh` command is
+not needed: open the **PORTS** panel next to the terminal, choose *Forward a Port* and enter
+`8090`.
+
+> The `/win1/` matters. ROOT serves each GUI panel as a separate named window, so the bare
+> `http://localhost:8090/` returns *404*. `/win2/` is the volume hierarchy browser, which is
+> useful on its own while working through Hands-on 1 and 2.
+
+The `.rootrc` in this directory fixes the port and disables ROOT's one-time URL key so that the
+address above never changes. `geoWebDisplay` also drops a `viewer.cxx` file in the current
+directory; it is a ROOT by-product and can be deleted.
+
+### Without port forwarding
+
+If forwarding is not an option, export the geometry and look at it locally:
+
+``` bash
+geoConverter -compact2tgeo -input simplecalo1/compact/simplecalo1.xml -output simplecalo1_geo.root
+# or -compact2gdml for a GDML file
+```
+
+Copy the result to your machine and open it in ROOT, or drag it onto <https://root.cern/js/>.
+
 Happy coding! :rocket:
