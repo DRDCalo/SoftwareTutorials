@@ -51,21 +51,6 @@ add_test(NAME test_RandomNoiseDigitizer
 # https://github.com/key4hep/k4FWCore/blob/42497b71c23425a3a26648f30a1285a499dcda28/test/k4FWCoreTest/CMakeLists.txt#L71
 
 
-# Smoke test for the DD4hep analysis script. It runs on the same example file as the Gaudi
-# exercises, which carries the same simplecaloRO collection. The script writes its PNG next
-# to the input, so operate on a copy inside the build tree.
-if(EXISTS ${SIM_FILE})
-    set(PLOT_INPUT ${CMAKE_CURRENT_BINARY_DIR}/plot_cell_energy_sum_input.root)
-    configure_file(${SIM_FILE} ${PLOT_INPUT} COPYONLY)
-
-    add_test(NAME test_PlotCellEnergySumPython
-                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                    COMMAND python ${PROJECT_SOURCE_DIR}/DD4hepTutorials/scripts/plot_cell_energy_sum.py ${PLOT_INPUT})
-
-else()
-    message(WARNING "${SIM_FILE} not available, skipping the DD4hep analysis script test.")
-endif()
-
 # Check that every notebook is well formed and that its code cells are valid Python.
 add_test(NAME test_NotebooksValid
                 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
@@ -86,6 +71,15 @@ add_test(NAME test_ReadEdm4hepNotebook
                 COMMAND jupyter nbconvert --to notebook --execute
                         ${PROJECT_SOURCE_DIR}/DD4hepTutorials/notebooks/readEdm4hepSolution.ipynb
                         --output ${CMAKE_CURRENT_BINARY_DIR}/readEdm4hepSolution_executed.ipynb)
+
+# The Section 1 notebook runs on the same bundled file, which carries the same
+# simplecaloRO collection. SIMPLECALO1_FILE keeps it off any full simulation that
+# happens to be sitting in the source tree.
+add_test(NAME test_CellEnergySumNotebook
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                COMMAND jupyter nbconvert --to notebook --execute
+                        ${PROJECT_SOURCE_DIR}/DD4hepTutorials/notebooks/plot_cell_energy_sum.ipynb
+                        --output ${CMAKE_CURRENT_BINARY_DIR}/plot_cell_energy_sum_executed.ipynb)
 
 get_filename_component(CURRENT_DIR_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 
@@ -116,6 +110,10 @@ set_tests_properties(${test_names} PROPERTIES ENVIRONMENT "${test_environment}")
 if(TEST test_ReadEdm4hepNotebook)
     set_property(TEST test_ReadEdm4hepNotebook APPEND PROPERTY
                  ENVIRONMENT "SIMPLECALO2_FILE=${SIMPLECALO2_FILE}")
+endif()
+if(TEST test_CellEnergySumNotebook)
+    set_property(TEST test_CellEnergySumNotebook APPEND PROPERTY
+                 ENVIRONMENT "SIMPLECALO1_FILE=${SIM_FILE}")
 endif()
 
 message(STATUS "================ Test Environment ================")

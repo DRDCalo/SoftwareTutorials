@@ -33,28 +33,30 @@ For instructions on **simplecalo1** and **simplecalo2** follow [this presentatio
 
 ## Analysing the output
 
-All analysis code is Python:
+All analysis lives in notebooks, all of it Python:
 
-| What | Where | How to run |
-|---|---|---|
-| Section 1: total cell energy and resolution fit | `scripts/plot_cell_energy_sum.py` | `python scripts/plot_cell_energy_sum.py simplecalo1.root` |
-| Hands-on 6: hits, layers, lateral shape, contributions | `notebooks/readEdm4hep.ipynb` | open in Jupyter or VS Code |
+| What | Notebook |
+|---|---|
+| Section 1: cell energy sum, Gaussian fit, energy resolution | `notebooks/plot_cell_energy_sum.ipynb` |
+| Hands-on 6: hits, layers, lateral shape, contributions | `notebooks/readEdm4hep.ipynb` |
 
 Hands-on 6 is a notebook with six questions to complete. The finished version sits next to it as
 `notebooks/readEdm4hepSolution.ipynb`. A deterministic 10-event input file is included as
-`data/simplecalo2_sample.root`, so both notebooks work directly after cloning. If the full
-`simplecalo2.root` produced by `ddsim --steeringFile simplecalo2/sc2SteeringFile.py` exists in
-this directory, the notebooks prefer it automatically. Set `SIMPLECALO2_FILE` to use another
-compatible EDM4hep ROOT file. That choice is made by `drdcalo_tutorials.simplecalo2_input()`,
-which the Gaudi exercises use as well.
+`data/simplecalo2_sample.root`, so every notebook works directly after cloning.
 
-### Running the notebook
+Each notebook resolves its own input. Section 1 prefers `simplecalo1.root` and Hands-on 6 prefers
+`simplecalo2.root`, both in this directory, and both fall back to the bundled sample when the full
+simulation has not been produced yet. `SIMPLECALO1_FILE` and `SIMPLECALO2_FILE` override the
+choice. The rules live in `drdcalo_tutorials.simplecalo1_input()` and
+`.simplecalo2_input()`, which is also where the Gaudi exercises get their paths.
+
+### Running the notebooks
 
 Uproot reads the EDM4hep ROOT file, DD4hep's native bit-field decoder interprets cell IDs,
-Awkward Array and NumPy process the data, and Matplotlib draws the results. The analysis does not
-use ROOT histograms or canvases. `setup.sh` in the top directory of the repository provides these
-packages, registers a Jupyter kernel, and exports the repository location used to find the sample;
-see the main README.
+Awkward Array and NumPy process the data, SciPy fits, and Matplotlib draws the results. No ROOT
+histograms or canvases are involved. `setup.sh` in the top directory of the repository provides
+these packages, registers a Jupyter kernel, and exports the repository location used to find the
+sample; see the main README.
 
 In **VS Code with Remote-SSH**, open `SoftwareTutorials` itself as the workspace folder — not a
 parent directory — then choose **Select Kernel** → **Python Environments** and pick

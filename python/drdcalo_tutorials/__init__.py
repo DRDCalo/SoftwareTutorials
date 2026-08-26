@@ -46,6 +46,12 @@ SAMPLE_INPUT = DD4HEP_TUTORIALS / "data" / "simplecalo2_sample.root"
 #: Where the simplecalo2 steering file writes its full simulation output.
 SIMULATED_INPUT = DD4HEP_TUTORIALS / "simplecalo2.root"
 
+#: Where the simplecalo1 steering file writes its full simulation output. The
+#: second name is what the steering file produced before the two exercises were
+#: given distinct output files, and is still accepted.
+SIMULATED_INPUT_SC1 = DD4HEP_TUTORIALS / "simplecalo1.root"
+LEGACY_INPUT_SC1 = DD4HEP_TUTORIALS / "simplecalo.root"
+
 
 def sample_input() -> str:
     """The bundled 10-event sample.
@@ -70,6 +76,23 @@ def simplecalo2_input() -> str:
         return str(Path(override).expanduser())
     if SIMULATED_INPUT.exists():
         return str(SIMULATED_INPUT)
+    return str(SAMPLE_INPUT)
+
+
+def simplecalo1_input() -> str:
+    """The simplecalo1 events to analyse in the Section 1 notebook.
+
+    A full simulation generated in the DD4hep tutorial is preferred when it is
+    there; otherwise the bundled sample is used, which carries the same
+    `simplecaloRO` collection and so gives a meaningful energy sum even though it
+    was produced with simplecalo2. Set SIMPLECALO1_FILE to read another file.
+    """
+    override = os.getenv("SIMPLECALO1_FILE")
+    if override:
+        return str(Path(override).expanduser())
+    for candidate in (SIMULATED_INPUT_SC1, LEGACY_INPUT_SC1):
+        if candidate.exists():
+            return str(candidate)
     return str(SAMPLE_INPUT)
 
 
