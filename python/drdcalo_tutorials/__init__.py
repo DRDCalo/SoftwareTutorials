@@ -29,7 +29,9 @@ a Gaudi property.
 """
 
 import os
+import sys
 from pathlib import Path
+from xml.etree import ElementTree
 
 REPOSITORY = Path(__file__).resolve().parents[2]
 
@@ -46,11 +48,15 @@ SAMPLE_INPUT = DD4HEP_TUTORIALS / "data" / "simplecalo2_sample.root"
 #: Where the simplecalo2 steering file writes its full simulation output.
 SIMULATED_INPUT = DD4HEP_TUTORIALS / "simplecalo2.root"
 
-#: Where the simplecalo1 steering file writes its full simulation output. The
-#: second name is what the steering file produced before the two exercises were
-#: given distinct output files, and is still accepted.
+#: Where the simplecalo1 steering file writes its full simulation output.
 SIMULATED_INPUT_SC1 = DD4HEP_TUTORIALS / "simplecalo1.root"
-LEGACY_INPUT_SC1 = DD4HEP_TUTORIALS / "simplecalo.root"
+
+#: The compact files the two exercises build their geometry from. Hands-on 6 reads
+#: its cell dimensions back out of the simplecalo2 one through compact_constants()
+#: instead of repeating the numbers, so that the analysis follows the geometry
+#: whenever the XML is changed.
+SIMPLECALO1_COMPACT = DD4HEP_TUTORIALS / "simplecalo1" / "compact" / "simplecalo1.xml"
+SIMPLECALO2_COMPACT = DD4HEP_TUTORIALS / "simplecalo2" / "compact" / "simplecalo2.xml"
 
 
 def sample_input() -> str:
@@ -61,6 +67,23 @@ def sample_input() -> str:
     k4run to analyse a different file.
     """
     return str(SAMPLE_INPUT)
+
+
+def _announce_fallback(expected: Path, steering: str) -> None:
+    """Say out loud that the bundled 10-event sample is being used.
+
+    Silently analysing a different file than the one the reader thinks they
+    produced is the most confusing thing this module could do, so the fallback
+    is never quiet. stderr, because in a notebook that is the stream that stands
+    out from the analysis output.
+    """
+    print(
+        f"NOTE: {expected} does not exist, falling back to the bundled 10-event sample.\n"
+        f"      Ten events are enough to make the code run, not to make a plot worth "
+        f"showing.\n"
+        f"      Produce the full simulation with:  ddsim --steeringFile {steering}",
+        file=sys.stderr,
+    )
 
 
 def simplecalo2_input() -> str:
@@ -76,6 +99,7 @@ def simplecalo2_input() -> str:
         return str(Path(override).expanduser())
     if SIMULATED_INPUT.exists():
         return str(SIMULATED_INPUT)
+    _announce_fallback(SIMULATED_INPUT, "simplecalo2/sc2SteeringFile.py")
     return str(SAMPLE_INPUT)
 
 
@@ -90,9 +114,9 @@ def simplecalo1_input() -> str:
     override = os.getenv("SIMPLECALO1_FILE")
     if override:
         return str(Path(override).expanduser())
-    for candidate in (SIMULATED_INPUT_SC1, LEGACY_INPUT_SC1):
-        if candidate.exists():
-            return str(candidate)
+    if SIMULATED_INPUT_SC1.exists():
+        return str(SIMULATED_INPUT_SC1)
+    _announce_fallback(SIMULATED_INPUT_SC1, "simplecalo1/sc1SteeringFile.py")
     return str(SAMPLE_INPUT)
 
 
@@ -100,3 +124,19 @@ def gaudi_output(filename: str) -> str:
     """Path for a file written by a Gaudi exercise, creating the directory."""
     GAUDI_DATA.mkdir(parents=True, exist_ok=True)
     return str(GAUDI_DATA / filename)
+
+
+def compact_constants(compact) -> dict:
+    """The <constant> definitions of a compact file, lengths in mm.
+
+    `<constant name="CellX" value="10.0*cm"/>` comes back as `{"CellX": 100.0}`.
+    Values are evaluated in the order the file defines them, so a constant can
+    refer to an earlier one the way the compact file does. mm is also the unit
+    EDM4hep stores positions in, so what comes back compares with a hit position
+    directly.
+    """
+    values = {"mm": 1.0, "cm": 10.0, "m": 1000.0}
+    for constant in ElementTree.parse(str(compact)).iter("constant"):
+        name, value = constant.get("name"), constant.get("value")
+        values[name] = eval(value, {"__builtins__": {}}, values)
+    return values

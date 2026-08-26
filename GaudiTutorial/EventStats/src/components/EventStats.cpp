@@ -27,6 +27,7 @@
 
 // STL
 #include <cmath>
+#include <limits>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -207,14 +208,28 @@ public:
 
     info() << "Event statistics:" << endmsg;
     info() << "Total deposited energy = " << totalEnergy << " GeV" << endmsg;
-    info() << "Energy Barycentre position: (" << barycentre_x << ", " << barycentre_y << ", " << barycentre_z << ") mm"
-           << endmsg;
-    info() << "Max energy: " << maxEnergy << " GeV at (" << maxEnergy_x << ", " << maxEnergy_y << ", " << maxEnergy_z
-           << ") mm" << endmsg;
-    info() << "Min energy: " << minEnergy << " GeV at (" << minEnergy_x << ", " << minEnergy_y << ", " << minEnergy_z
-           << ") mm" << endmsg;
-    info() << "MaxXYZ values: (" << max_pos_x << ", " << max_pos_y << ", " << max_pos_z << ") mm" << endmsg;
-    info() << "MinXYZ values: (" << min_pos_x << ", " << min_pos_y << ", " << min_pos_z << ") mm" << endmsg;
+
+    // An event whose collection is empty is a normal occurrence: the particle can
+    // miss the calorimeter. The loop above then never ran, so every extremum is
+    // still at the sentinel it was initialised with, and printing
+    // numeric_limits::lowest() as "the maximum energy" is worse than saying
+    // nothing at all.
+    if (InputSimCaloHitCollection.size() == 0) {
+      info() << "No calorimeter hits in this event: no barycentre and no extrema." << endmsg;
+    } else {
+      if (totalEnergy > 0.0) {
+        info() << "Energy Barycentre position: (" << barycentre_x << ", " << barycentre_y << ", " << barycentre_z
+               << ") mm" << endmsg;
+      } else {
+        info() << "No energy deposited in this event: the barycentre is undefined." << endmsg;
+      }
+      info() << "Max energy: " << maxEnergy << " GeV at (" << maxEnergy_x << ", " << maxEnergy_y << ", " << maxEnergy_z
+             << ") mm" << endmsg;
+      info() << "Min energy: " << minEnergy << " GeV at (" << minEnergy_x << ", " << minEnergy_y << ", " << minEnergy_z
+             << ") mm" << endmsg;
+      info() << "MaxXYZ values: (" << max_pos_x << ", " << max_pos_y << ", " << max_pos_z << ") mm" << endmsg;
+      info() << "MinXYZ values: (" << min_pos_x << ", " << min_pos_y << ", " << min_pos_z << ") mm" << endmsg;
+    }
     info() << "------------------------------" << endmsg;
 
     ////////////////
@@ -229,7 +244,7 @@ public:
 
     if (m_saveHisto.value()) {
 
-      TFile* f = new TFile("debugEventStats.root", "RECREATE");
+      TFile* f = new TFile(m_histoFile.value().c_str(), "RECREATE");
       hTotalEnergy->Write();
       hMaxEnergy->Write();
       hMinEnergy->Write();
@@ -246,6 +261,11 @@ public:
 
 private:
   Gaudi::Property<bool> m_saveHisto{this, "SaveHistograms", false, "flag to save histograms"};
+
+  // Written relative to the current directory, so the tests point it at their own
+  // build directory rather than dropping a file into the source tree.
+  Gaudi::Property<std::string> m_histoFile{this, "HistogramFile", "debugEventStats.root",
+                                           "file the histograms above are written to"};
 
   mutable std::mutex m_histoMutex;
 

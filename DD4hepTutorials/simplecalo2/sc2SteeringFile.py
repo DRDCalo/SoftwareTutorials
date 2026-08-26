@@ -19,9 +19,11 @@
 import inspect
 import os
 
-# Directory of this steering file, so that ddsim can be launched from anywhere.
-# ddsim runs this file through exec() without defining __file__, hence inspect.
+# Directory of this steering file, and the DD4hepTutorials directory above it, so
+# that ddsim can be launched from anywhere. ddsim runs this file through exec()
+# without defining __file__, hence inspect.
 _HERE = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+_TUTORIAL_DIR = os.path.dirname(_HERE)
 
 from DDSim.DD4hepSimulation import DD4hepSimulation
 from g4units import mm, m, cm, GeV, MeV
@@ -44,7 +46,10 @@ SIM.macroFile = ""
 ## number of events to simulate, used in batch mode
 SIM.numberOfEvents = 500
 ## Outputfile from the simulation: .slcio, edm4hep.root and .root output files are supported
-SIM.outputFile = "simplecalo2.root"
+# Anchored on DD4hepTutorials/ rather than the current directory, because that is
+# where the notebooks look for it (see drdcalo_tutorials.simplecalo2_input).
+# --outputFile on the ddsim command line still overrides this.
+SIM.outputFile = os.path.join(_TUTORIAL_DIR, "simplecalo2.root")
 ## Physics list to use in simulation
 SIM.physicsList = None
 ## Verbosity use integers from 1(most) to 7(least) verbose

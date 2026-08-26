@@ -1,21 +1,13 @@
 # SoftwareTutorials
 
-
-This repository hosts a variety of software tutorials related to DRDCalo (formerly DRD6) Collaboration activities.
-It includes the tutorials on DD4hep and Gaudi, presented in the 2nd and 4th Collaboration Meeting respectively.
-
-Ideally, this repository is expanded with relevant tutorials in the future.
-
-The tutorials can be completed by following the presentation slides linked in the corresponding sub-directories
-
+This repository hosts software tutorials related to DRDCalo (formerly DRD6) Collaboration
+activities: DD4hep and Gaudi, presented at the 2nd and 4th Collaboration Meeting respectively.
+Each is completed by following the presentation slides linked in its sub-directory.
 
 ## Compilation
 
-These tutorials are made within the key4hep environment.
-To compile and run them, access to an EL9 machine (AlmaLinux 9, RHEL 9, ...) with `/cvmfs/` mounted (e.g. lxplus) to source the key4hep stack is required.
-
-To clone and build the repository, run the following commands:
-
+These tutorials run inside the key4hep environment, so they need an EL9 machine (AlmaLinux 9,
+RHEL 9, ...) with `/cvmfs/` mounted — lxplus, for instance.
 
 ``` bash
 git clone https://github.com/DRDCalo/SoftwareTutorials.git
@@ -31,42 +23,33 @@ make install -j6
 
 1. sources the key4hep stack, pinned to a fixed release so that everybody works with the same
    software (override with `KEY4HEP_VERSION=... source setup.sh`);
-2. runs `k4_local_repo`, which points the environment at the libraries built in this repository;
-3. creates a virtual environment in `.venv` that inherits everything from the stack;
-4. makes `drdcalo_tutorials` importable — the module that resolves the tutorial input and
-   output paths — by putting `python/` on `PYTHONPATH` and dropping a `.pth` file into `.venv`,
-   so that it is found even by a process that does not inherit the variable;
-5. writes a `.env` file capturing the environment, which is what gives the notebooks the
-   key4hep runtime.
+2. runs `k4_local_repo`, pointing the environment at the libraries built here;
+3. creates `.venv`, a virtual environment inheriting everything from the stack;
+4. makes `drdcalo_tutorials` importable — the module resolving every tutorial's input and output
+   paths — through `PYTHONPATH` and a `.pth` file in `.venv`, so even a process that does not
+   inherit the variable finds it;
+5. writes `.env` with the key4hep runtime paths, which is what an editor hands to a notebook
+   kernel. Only those variables are written, never the rest of your shell environment, and the
+   file is created `0600`.
 
-If the shell already has a different key4hep release active, `setup.sh` stops instead of mixing
-the two environments. Start a fresh shell without that release and source `setup.sh` again.
+If a different key4hep release is already active, `setup.sh` stops rather than mixing the two.
+Inside a container step 5 is skipped and it says so: `.env` records absolute paths and is read by
+an editor on the host, where the container's mount point would be wrong.
 
-Inside a container, step 5 is skipped and `setup.sh` says so: `.env` records absolute paths and
-is read by an editor running on the host, so writing the container's mount point into it would
-stop the notebooks working there. Source `setup.sh` on the host as well when you open notebooks
-there.
-
-Steps 3 to 5 exist for the notebooks. An editor that starts a Jupyter kernel does not inherit
-your shell, so it needs an interpreter it can find (`.venv`) and the environment containing the
-Python analysis packages and repository location (`.env`). Both are ignored by git and can be
-deleted and recreated at any time by sourcing `setup.sh` again.
+Steps 3 to 5 exist for the notebooks: an editor's Jupyter kernel does not inherit your shell, so
+it needs an interpreter it can find (`.venv`) and the environment to run in (`.env`). Both are
+ignored by git and are rebuilt by sourcing `setup.sh` again.
 
 ### Using the notebooks in VS Code
 
 **Open `SoftwareTutorials` itself as the workspace folder**, not a parent directory. This is the
-one thing that has to be right. VS Code applies `${workspaceFolder}/.env` to the interpreter it
-launches, and `.env` is what carries the key4hep runtime; if the workspace folder is a level
-above, VS Code looks for the wrong `.env`, finds nothing, and the notebook fails with
-`ModuleNotFoundError: No module named 'awkward'`.
+one thing that has to be right: VS Code applies `${workspaceFolder}/.env`, and from a level above
+it finds nothing and the notebook fails with `ModuleNotFoundError: No module named 'awkward'`.
+Then choose **Select Kernel** → **Python Environments** and pick `.venv/bin/python` (shown as
+*DRDCalo Tutorial*). No kernel has to be registered.
 
-With the repository open as the workspace folder, source `setup.sh`, then in a notebook choose
-**Select Kernel** → **Python Environments** and pick `.venv/bin/python` (shown as *DRDCalo
-Tutorial*). No kernel has to be registered, and there is no port forwarding because everything
-runs over the existing Remote-SSH connection.
-
-If you must keep a parent directory as the workspace folder, point VS Code at the right file
-instead, in that workspace's `.vscode/settings.json`:
+To keep a parent directory as the workspace folder instead, point VS Code at the right file in
+that workspace's `.vscode/settings.json`:
 
 ``` json
 {
@@ -74,26 +57,26 @@ instead, in that workspace's `.vscode/settings.json`:
 }
 ```
 
-If a notebook reports a missing module, the captured environment is stale: source `setup.sh`
-again and restart the kernel. If VS Code offers to install packages, that means it is running an
-interpreter without the key4hep stack — fix the workspace folder or `python.envFile` rather than
-accepting the install, which cannot make that environment work.
+If a module goes missing, the recorded environment is stale: source `setup.sh` again and restart
+the kernel. If it stays missing, the variable providing it is not on the allow-list in step 5 of
+`setup.sh` — add the name there. If VS Code offers to install packages, it is running an
+interpreter without the key4hep stack; fix the workspace folder rather than accepting.
 
 ### Disk space
 
-`ddsim` writes a large EDM4hep file: the 500 events configured in the steering files produce
-roughly 600 MB, and each tutorial writes its own. If your home directory has a small quota,
-write the output elsewhere:
+`ddsim` writes a large EDM4hep file: the 500 events configured in the steering files are roughly
+600 MB, and each tutorial writes its own. Without `--outputFile` they land in
+`DD4hepTutorials/simplecalo1.root` and `DD4hepTutorials/simplecalo2.root` — where the notebooks
+look — whatever directory `ddsim` was launched from. On a small quota, write elsewhere and point
+the notebook at it:
 
 ``` bash
-ddsim --steeringFile simplecalo1/sc1SteeringFile.py --outputFile /tmp/simplecalo1.root
+ddsim --steeringFile DD4hepTutorials/simplecalo1/sc1SteeringFile.py --outputFile /tmp/simplecalo1.root
+export SIMPLECALO1_FILE=/tmp/simplecalo1.root
 ```
 
 or lower `SIM.numberOfEvents`; 100 events are already plenty for the energy resolution fit.
 
-The Hands-on 6 notebooks and all Gaudi exercises remain usable without generating that large
-file: they share the bundled 10-event `DD4hepTutorials/data/simplecalo2_sample.root`. A locally
-generated `DD4hepTutorials/simplecalo2.root` is preferred automatically by the notebooks when
-present; the Gaudi exercises stay on the small sample unless `--IOSvc.Input` says otherwise.
-Both rules live in `python/drdcalo_tutorials/__init__.py`, which is where every tutorial
-resolves its input and output paths.
+Nothing forces you to generate that file at all: the notebooks and all Gaudi exercises fall back
+to the bundled 10-event `DD4hepTutorials/data/simplecalo2_sample.root`, and say so when they do.
+Every one of these rules lives in `python/drdcalo_tutorials/__init__.py`.

@@ -141,10 +141,13 @@ namespace sim {
 
     // Describe this step as a contribution to the cell it happened in.
     //
-    // Units: Geant4 gives energies in MeV, lengths in mm and times in ns, which
-    // is what EDM4hep expects for SimCalorimeterHit and CaloHitContribution
-    // (see the EDM4hep yaml file). Nothing is rescaled here. Do not confuse this
-    // with dd4hep's unit system, where the native length unit is cm.
+    // Units: everything below stays in Geant4's internal units, i.e. MeV, mm and
+    // ns. Nothing is converted here, and nothing should be: DDG4's EDM4hep writer
+    // (Geant4Output2EDM4hep) divides by CLHEP::GeV, CLHEP::mm and CLHEP::ns when
+    // it serialises the hits, so the file ends up with the GeV, mm and ns that
+    // EDM4hep specifies. Converting here as well would apply the factor twice.
+    // Do not confuse either with dd4hep's own unit system, whose native length
+    // unit is cm.
     Geant4Calorimeter::Hit::Contribution contrib;
     contrib.trackID = aStep->GetTrack()->GetTrackID();
     contrib.pdgID = aStep->GetTrack()->GetParticleDefinition()->GetPDGEncoding();

@@ -22,17 +22,30 @@ if(NOT EXISTS ${SIM_FILE})
     message(FATAL_ERROR "Bundled tutorial input not found: ${SIM_FILE}")
 endif()
 
+# Everything the tests write goes into the build directory: the option files are
+# named absolutely and the working directory is the build tree, so a `ctest` run
+# leaves the checkout untouched.
+set(GAUDI_OPTIONS ${PROJECT_SOURCE_DIR}/GaudiTutorial)
+
 add_test(NAME test_EventStats
-                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                COMMAND k4run GaudiTutorial/EventStats/options/runEventStatsSolution.py --IOSvc.Input ${SIM_FILE} --IOSvc.Output ${CMAKE_CURRENT_BINARY_DIR}/simpleCalo_eventStats.root)
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                COMMAND k4run ${GAUDI_OPTIONS}/EventStats/options/runEventStatsSolution.py --IOSvc.Input ${SIM_FILE} --IOSvc.Output ${CMAKE_CURRENT_BINARY_DIR}/simpleCalo_eventStats.root --EventStats.HistogramFile ${CMAKE_CURRENT_BINARY_DIR}/debugEventStats.root)
+
+# The multithreaded configuration is what motivates the mutex around the shared
+# histograms in EventStats.cpp, so it is exercised as well. Ten events across six
+# threads is cheap, and ThreadSanitizer aside it is what catches an unprotected
+# TH1::Fill turning into a crash or a corrupted histogram.
+add_test(NAME test_EventStatsMultithreading
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                COMMAND k4run ${GAUDI_OPTIONS}/EventStats/options/runEventStatsMultithreading.py --IOSvc.Input ${SIM_FILE} --IOSvc.Output ${CMAKE_CURRENT_BINARY_DIR}/simpleCalo_eventStats_multithreaded.root --EventStats.HistogramFile ${CMAKE_CURRENT_BINARY_DIR}/debugEventStats_multithreaded.root)
 
 add_test(NAME test_MoliereRadius
-                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                COMMAND k4run GaudiTutorial/MoliereRadiusFunctional/options/runMoliereRadiusSolution.py --IOSvc.Input ${SIM_FILE} --IOSvc.Output ${CMAKE_CURRENT_BINARY_DIR}/simpleCalo_moliereRadius.root)
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                COMMAND k4run ${GAUDI_OPTIONS}/MoliereRadiusFunctional/options/runMoliereRadiusSolution.py --IOSvc.Input ${SIM_FILE} --IOSvc.Output ${CMAKE_CURRENT_BINARY_DIR}/simpleCalo_moliereRadius.root)
 
 add_test(NAME test_RandomNoiseDigitizer
-                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                COMMAND k4run GaudiTutorial/RandomNoiseDigitizer/options/runRandomNoiseDigitizerSolution.py --IOSvc.Input ${SIM_FILE} --IOSvc.Output ${CMAKE_CURRENT_BINARY_DIR}/simpleCalo_noiseDigitizer.root)
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                COMMAND k4run ${GAUDI_OPTIONS}/RandomNoiseDigitizer/options/runRandomNoiseDigitizerSolution.py --IOSvc.Input ${SIM_FILE} --IOSvc.Output ${CMAKE_CURRENT_BINARY_DIR}/simpleCalo_noiseDigitizer.root)
 
 # For LD_LIBRARY_PATH
 # ${PROJECT_BINARY_DIR}                                         # The files <plugins>.components and <plugins>.confdb are here
@@ -53,7 +66,7 @@ add_test(NAME test_RandomNoiseDigitizer
 
 # Check that every notebook is well formed and that its code cells are valid Python.
 add_test(NAME test_NotebooksValid
-                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                 COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/check_notebooks.py)
 
 # Execute the solution notebook against the bundled sample by default. Developers can still

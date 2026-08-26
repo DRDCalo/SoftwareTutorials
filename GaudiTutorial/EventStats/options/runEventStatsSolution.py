@@ -37,6 +37,7 @@ eventStats_functional = EventStats("EventStats",
     OutputEnergyBarycentre = ["EnergyBarycentreX", "EnergyBarycentreY", "EnergyBarycentreZ"],
     OutputTotalEnergy = ["TotalEnergy"],
     SaveHistograms = True,
+    HistogramFile = gaudi_output("debugEventStats.root"),
     OutputLevel = INFO
 )
 

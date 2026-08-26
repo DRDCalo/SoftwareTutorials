@@ -30,7 +30,9 @@ scheduler = AvalancheSchedulerSvc(ThreadPoolSize=threads)
 
 io_svc = IOSvc("IOSvc")
 io_svc.Input = sample_input()
-io_svc.Output = gaudi_output("simpleCalo_eventStats.root")
+# Its own output names, so that running this next to runEventStatsSolution.py
+# compares the two results instead of overwriting one with the other.
+io_svc.Output = gaudi_output("simpleCalo_eventStats_multithreaded.root")
 
 chra = ChronoAuditor()
 audsvc = AuditorSvc()
@@ -43,6 +45,7 @@ eventStats_functional = EventStats("EventStats",
     OutputEnergyBarycentre = ["EnergyBarycentreX", "EnergyBarycentreY", "EnergyBarycentreZ"],
     OutputTotalEnergy = ["TotalEnergy"],
     SaveHistograms = True,
+    HistogramFile = gaudi_output("debugEventStats_multithreaded.root"),
     OutputLevel = INFO
 )
 

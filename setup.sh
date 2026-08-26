@@ -183,28 +183,89 @@ if ${_TUTORIAL_IN_CONTAINER}; then
     return 0
 fi
 
-# 5. Capture the environment so that Jupyter kernels started by an editor, which
-#    do not inherit this shell, still find ROOT, DD4hep and podio. The repository
-#    location is exported too, so that notebooks can locate their input file
-#    whatever directory the editor happens to start them in.
+# 5. Record the part of the environment the notebooks need, so that Jupyter
+#    kernels started by an editor, which do not inherit this shell, still find
+#    ROOT, DD4hep and podio. The repository location is written down too, so that
+#    notebooks can locate their input file whatever directory the editor happens
+#    to start them in.
 export DRDCALO_TUTORIALS_ROOT="${_TUTORIAL_ROOT}"
-python - > "${_TUTORIAL_ROOT}/.env" <<'PYEOF'
+if ! DRDCALO_ENV_FILE="${_TUTORIAL_ROOT}/.env" python - <<'PYEOF'
 import os
+import stat
 
-# PKG_CONFIG_PATH is long and unnecessary, and an over-long environment makes
-# process startup fail. The container variables are dropped because they confuse
-# editors running outside the container.
-SKIP = {"PKG_CONFIG_PATH", "_", "SHLVL", "OLDPWD", "PWD"}
+# Only the variables that make the key4hep runtime work are written out. The
+# shell environment as a whole is not ours to copy into a file: it routinely
+# carries Kerberos ticket paths, proxy credentials, CI tokens and similar, and
+# .env is read by an editor rather than by a login shell. Everything else the
+# kernel needs (HOME, USER, ...) it already inherits from the editor.
+#
+# If a notebook ever reports something missing from its environment, add the
+# variable here rather than widening this into "copy everything".
+KEEP = {
+    # Executables, shared libraries and Python packages
+    "PATH",
+    "LD_LIBRARY_PATH",
+    "PYTHONPATH",
+    "CMAKE_PREFIX_PATH",
+    # This repository: the virtual environment and the input-file resolution
+    "VIRTUAL_ENV",
+    "VIRTUAL_ENV_PROMPT",
+    "DRDCALO_TUTORIALS_ROOT",
+    # ROOT and its Python bindings, which is what `import dd4hep` goes through
+    "ROOTSYS",
+    "ROOT_INCLUDE_PATH",
+    "ROOT_LIBRARY_PATH",
+    "ROOT_VERSION",
+    "CLING_STANDARD_PCH",
+    "CPPYY_API_PATH",
+    "CPPYY_BACKEND_LIBRARY",
+    # The stack itself
+    "KEY4HEP_STACK",
+    "key4hep_stack_version",
+    # Plugins, geometry and detector data used by the exercises
+    "GAUDI_PLUGIN_PATH",
+    "MARLIN_DLL",
+    "DD4HEP",
+    "DD4hepINSTALL",
+    "DD4hep_DIR",
+    "DD4hep_ROOT",
+    "K4GEO",
+    "k4geo_DIR",
+    "LCGEO",
+    "lcgeo_DIR",
+    "LCIO",
+    # Jupyter, so that a kernel started from this environment finds its own data
+    "JUPYTER_PATH",
+    "JUPYTER_CONFIG_PATH",
+    "JUPYTERLAB_DIR",
+}
 
+# Geant4 dataset locations: G4LEDATA, G4ENSDFSTATEDATA and a dozen more, all
+# named the same way and all pointing into the stack.
+KEEP_PREFIXES = ("G4",)
+
+lines = []
 for name, value in sorted(os.environ.items()):
-    if name in SKIP or name.startswith("BASH_FUNC_"):
+    if name not in KEEP and not name.startswith(KEEP_PREFIXES):
         continue
-    if "SINGULARITY" in name or "APPTAINER" in name:
+    if "\n" in value:  # cannot be represented in a .env file
         continue
-    if "\n" in value:          # cannot be represented in a .env file
-        continue
-    print(f'{name}="{value}"')
+    lines.append(f'{name}="{value}"\n')
+
+# Written by hand rather than through a shell redirection so that the file is
+# created 0600 instead of whatever the umask happens to be: it describes this
+# user's stack and belongs to this user.
+path = os.environ["DRDCALO_ENV_FILE"]
+fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+with os.fdopen(fd, "w") as env_file:
+    env_file.writelines(lines)
+# O_CREAT leaves the mode of an already existing file alone, so set it explicitly.
+os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
 PYEOF
+then
+    echo "Failed to write ${_TUTORIAL_ROOT}/.env."
+    return 1
+fi
 
 echo
 echo "Environment ready."

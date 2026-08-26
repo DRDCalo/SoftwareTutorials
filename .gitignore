@@ -256,3 +256,6 @@ test/gaudi_opts/testConverterConstants.py
 # Small deterministic input that keeps the EDM4hep notebook runnable after a fresh clone.
 !DD4hepTutorials/data/
 !DD4hepTutorials/data/simplecalo2_sample.root
+
+# geoWebDisplay writes this next to the geometry it is showing.
+viewer.cxx
