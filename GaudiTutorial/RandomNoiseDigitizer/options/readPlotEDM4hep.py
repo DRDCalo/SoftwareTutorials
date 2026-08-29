@@ -3,11 +3,22 @@ import os
 # Disable ROOT web display on remote machines
 os.environ["ROOT_WEBDISPLAY"] = "off"
 
+import argparse
 import podio
 import ROOT
+from dd4hep import dd4hep 
 
 
-input_file = "../../data/simpleCalo_noiseDigitizer.root"
+parser = argparse.ArgumentParser()
+parser.add_argument("-i", "--input-file", required=True, help="Input ROOT EDM4hep file")
+parser.add_argument("-o", "--output-folder", default="../../data/digitizer-plots", help="Output folder for ROOT and pdf files")
+args = parser.parse_args()
+
+#input = "../../data/simpleCalo_noiseDigitizer.root"
+input_file = args.input_file  
+output_folder = args.output_folder
+
+os.makedirs(output_folder, exist_ok=True)
 
 # detector geometry parameters
 n_layers = 20
@@ -20,7 +31,7 @@ n_cells_y = 10
 
 # Histos for transverse energy profile histograms for each layer
 h_transverse = []
-for layer in range(n_layers):
+for layer in range(1, n_layers + 1):
     h = ROOT.TH2F(
         f"h_transverse_{layer}",
         f"Layer {layer}",
@@ -34,9 +45,8 @@ for layer in range(n_layers):
 h_longitudinal = ROOT.TH1F(
     "h_longitudinal",
     "Longitudinal energy profile;Layer;Energy [MeV]",
-    n_layers, -0.5, n_layers - 0.5
+    n_layers, 0.5, n_layers + 0.5
 )
-
 
 # Read EDM4hep file using podio and python bindings
 reader = podio.root_io.Reader(input_file)
@@ -61,10 +71,11 @@ for event in reader.get("events"):
         energy = hit.getEnergy() * 1000.0  # GeV -> MeV
         pos = hit.getPosition()
         
-        # Determine calorimeter layer from z
-        layer = int((pos.z + calo_z / 2.0) / layer_thickness)
-        if 0 <= layer < n_layers:
-            h_transverse[layer].Fill(pos.x, pos.y, energy)  
+        # Determine calorimeter layer and fill histograms
+        decoder = dd4hep.BitFieldCoder("calolayer:5,abslayer:1,x:-10,y:-10")
+        layer = decoder.get(hit.getCellID(), "calolayer")
+        if 1 <= layer <= n_layers:
+            h_transverse[layer - 1].Fill(pos.x, pos.y, energy)  
             h_longitudinal.Fill(layer, energy)
             
     for hit in simhits:
@@ -96,7 +107,7 @@ canvas_longitudinal = ROOT.TCanvas(
 canvas_longitudinal.SetLogy()       # Set log scale
 h_longitudinal.SetLineColor(ROOT.kRed)
 h_longitudinal.Draw("HIST")
-canvas_longitudinal.SaveAs("longitudinal_profile.pdf")
+canvas_longitudinal.SaveAs(os.path.join(output_folder, "longitudinal_profile.pdf"))
 
 # ---------------------------------
 # Transverse per-layer profiles
@@ -124,7 +135,7 @@ for layer, h in enumerate(h_transverse):
     ROOT.gPad.SetBottomMargin(0.12)
 
     h.Draw("COL")                           # 2D histogram with color map
-canvas_transverse.SaveAs("transverse_profiles_layers.pdf")
+canvas_transverse.SaveAs(os.path.join(output_folder, "transverse_profiles_layers.pdf"))
 
 # ---------------------------------
 # Sim-digi cell energy difference 
@@ -168,10 +179,10 @@ legend.AddEntry(0, f"#mu = {mean:.4g} MeV", "")
 legend.AddEntry(0, f"#sigma = {sigma:.4g} MeV", "")
 legend.Draw()
 
-canvas_energy_diff.SaveAs("energy_difference.pdf")
+canvas_energy_diff.SaveAs(os.path.join(output_folder, "energy_difference.pdf"))
 
 # Save canvases to a ROOT file
-output_file = ROOT.TFile("plots.root", "RECREATE")
+output_file = ROOT.TFile(os.path.join(output_folder, "plots.root"), "RECREATE")
 
 canvas_longitudinal.Write()
 canvas_transverse.Write()
