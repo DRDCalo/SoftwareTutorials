@@ -1,3 +1,21 @@
+#
+# Copyright (c) 2020-2024 Key4hep-Project.
+#
+# This file is part of Key4hep.
+# See https://key4hep.github.io/key4hep-doc/ for further info.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 import os
 
 # Disable ROOT web display on remote machines
@@ -6,7 +24,7 @@ os.environ["ROOT_WEBDISPLAY"] = "off"
 import argparse
 import podio
 import ROOT
-from dd4hep import dd4hep 
+from dd4hep import dd4hep
 
 
 parser = argparse.ArgumentParser()
@@ -15,7 +33,7 @@ parser.add_argument("-o", "--output-folder", default="../../data/digitizer-plots
 args = parser.parse_args()
 
 #input = "../../data/simpleCalo_noiseDigitizer.root"
-input_file = args.input_file  
+input_file = args.input_file
 output_folder = args.output_folder
 
 os.makedirs(output_folder, exist_ok=True)
@@ -40,7 +58,7 @@ for layer in range(1, n_layers + 1):
     )
     h.SetStats(0)
     h_transverse.append(h)
-    
+
 # Histo for longitudinal energy profile
 h_longitudinal = ROOT.TH1F(
     "h_longitudinal",
@@ -56,38 +74,38 @@ cell_diffs = []
 
 # Event loop
 for event in reader.get("events"):
-    # Get relevant collections 
+    # Get relevant collections
     simhits = event.get("simplecaloRO")
     digihits = event.get("CaloDigiHits")
-    # Dictionaries for CellID-based sim-digi comparison 
+    # Dictionaries for CellID-based sim-digi comparison
     sim_by_cell = {}
     digi_by_cell = {}
-    
+
     for hit in digihits:
         # Store hit by CellID for sim-digi comparison
         digi_by_cell[hit.getCellID()] = hit
-        
+
         # Get hit energy and position
         energy = hit.getEnergy() * 1000.0  # GeV -> MeV
         pos = hit.getPosition()
-        
+
         # Determine calorimeter layer and fill histograms
         decoder = dd4hep.BitFieldCoder("calolayer:5,abslayer:1,x:-10,y:-10")
         layer = decoder.get(hit.getCellID(), "calolayer")
         if 1 <= layer <= n_layers:
-            h_transverse[layer - 1].Fill(pos.x, pos.y, energy)  
+            h_transverse[layer - 1].Fill(pos.x, pos.y, energy)
             h_longitudinal.Fill(layer, energy)
-            
+
     for hit in simhits:
         sim_by_cell[hit.getCellID()] = hit
-            
+
     common_cells = sim_by_cell.keys() & digi_by_cell.keys()
-    
+
     for cellid in common_cells:
         sim_energy = sim_by_cell[cellid].getEnergy() * 1000.0
         digi_energy = digi_by_cell[cellid].getEnergy() * 1000.0
         cell_diffs.append(digi_energy - sim_energy)
-            
+
     n_events += 1
 
 
@@ -138,7 +156,7 @@ for layer, h in enumerate(h_transverse):
 canvas_transverse.SaveAs(os.path.join(output_folder, "transverse_profiles_layers.pdf"))
 
 # ---------------------------------
-# Sim-digi cell energy difference 
+# Sim-digi cell energy difference
 
 diff_min = min(cell_diffs)
 diff_max = max(cell_diffs)
