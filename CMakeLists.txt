@@ -30,7 +30,7 @@ set(PACKAGE_VERSION "${PACKAGE_VERSION_MAJOR}.${PACKAGE_VERSION_MINOR}.${PACKAGE
 
 # dependencies are declared like this
 find_package(Gaudi)
-find_package(ROOT COMPONENTS RIO Tree)
+find_package(ROOT COMPONENTS Hist RIO Tree)
 find_package(EDM4HEP)
 find_package(k4FWCore)
 find_package(DD4hep)
