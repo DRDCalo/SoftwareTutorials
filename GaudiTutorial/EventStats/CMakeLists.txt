@@ -25,6 +25,7 @@ gaudi_add_module(${PackageName}
                  LINK Gaudi::GaudiKernel
                       k4FWCore::k4FWCore
                       EDM4HEP::edm4hep
+                      ROOT::Hist
                       )
 
 install(TARGETS ${PackageName}
