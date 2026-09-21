@@ -61,3 +61,7 @@ The goal of this exercise is to complete a simple digitising algorithm from a sk
 
 The goal of this exercise is to complete a Gaudi algorithm to compute a physics value from the data, and to revise adding algorithms to the steering file.
 Solution files are provided.
+
+## MLShowerID
+
+A template of implementing the Machine Learning model with ONNX into Key4hep. The model is trained individually. 
