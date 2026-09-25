@@ -28,17 +28,12 @@ set(PACKAGE_VERSION_PATCH 3)
 
 set(PACKAGE_VERSION "${PACKAGE_VERSION_MAJOR}.${PACKAGE_VERSION_MINOR}.${PACKAGE_VERSION_PATCH}")
 
-# dependencies are declared like this
-find_package(Gaudi)
-find_package(ROOT COMPONENTS RIO Tree)
-find_package(EDM4HEP)
-find_package(k4FWCore)
-find_package(DD4hep)
-
 include(cmake/Key4hepConfig.cmake)
 
 include(GNUInstallDirs)
 
+# Each tutorial declares its own dependencies so that it can also be configured
+# directly from its subdirectory.
 add_subdirectory(GaudiTutorial)
 add_subdirectory(DD4hepTutorials)
 

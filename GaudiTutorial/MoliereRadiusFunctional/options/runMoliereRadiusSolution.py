@@ -16,6 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from pathlib import Path
+
 from Gaudi.Configuration import INFO
 from k4FWCore import IOSvc, ApplicationMgr
 from Configurables import EventDataSvc, UniqueIDGenSvc, ChronoAuditor, AuditorSvc
@@ -24,9 +26,11 @@ chra = ChronoAuditor()
 audsvc = AuditorSvc()
 audsvc.Auditors = [chra]
 
+data_dir = Path(__file__).resolve().parents[2] / "data"
+
 io_svc = IOSvc("IOSvc")
-io_svc.Input = "../../data/simpleCalo_simulation.root"
-io_svc.Output = "../../data/simpleCalo_moliereRadius.root"
+io_svc.Input = str(data_dir / "simpleCalo_simulation.root")
+io_svc.Output = str(data_dir / "simpleCalo_moliereRadius.root")
 
 from Configurables import EventStats
 

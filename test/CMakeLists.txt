@@ -18,16 +18,16 @@ limitations under the License.
 ]]
 
 add_test(NAME test_EventStats
-                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                COMMAND k4run GaudiTutorial/EventStats/options/runEventStatsSolution.py --IOSvc.Input ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root --IOSvc.Output ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_eventStats.root)
+                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/GaudiTutorial/data
+                COMMAND k4run ${PROJECT_SOURCE_DIR}/GaudiTutorial/EventStats/options/runEventStatsSolution.py --IOSvc.Input ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root --IOSvc.Output ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_eventStats.root)
 
 add_test(NAME test_MoliereRadius
-                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                COMMAND k4run GaudiTutorial/MoliereRadiusFunctional/options/runMoliereRadiusSolution.py --IOSvc.Input ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root --IOSvc.Output ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_moliereRadius.root)
+                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/GaudiTutorial/data
+                COMMAND k4run ${PROJECT_SOURCE_DIR}/GaudiTutorial/MoliereRadiusFunctional/options/runMoliereRadiusSolution.py --IOSvc.Input ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root --IOSvc.Output ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_moliereRadius.root)
 
 add_test(NAME test_RandomNoiseDigitizer
-                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                COMMAND k4run GaudiTutorial/RandomNoiseDigitizer/options/runRandomNoiseDigitizerSolution.py --IOSvc.Input ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root --IOSvc.Output ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_noiseDigitizer.root)
+                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/GaudiTutorial/data
+                COMMAND k4run ${PROJECT_SOURCE_DIR}/GaudiTutorial/RandomNoiseDigitizer/options/runRandomNoiseDigitizerSolution.py --IOSvc.Input ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root --IOSvc.Output ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_noiseDigitizer.root)
 
 # For LD_LIBRARY_PATH
 # ${PROJECT_BINARY_DIR}                                         # The files <plugins>.components and <plugins>.confdb are here
