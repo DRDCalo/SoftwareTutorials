@@ -36,6 +36,21 @@ find_package(EDM4HEP REQUIRED)
 find_package(k4FWCore REQUIRED)
 find_package(DD4hep REQUIRED)
 
+# The exercises and their tests use this input file.  Keep the download in
+# GaudiTutorial so it is also available when this directory is configured as a
+# standalone project.
+set(SIM_FILE ${CMAKE_CURRENT_SOURCE_DIR}/data/simpleCalo_simulation.root)
+
+if(NOT EXISTS ${SIM_FILE})
+    message(STATUS "Downloading simpleCalo_simulation.root ...")
+    file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data)
+    execute_process(
+        COMMAND wget -O ${SIM_FILE} https://fccsw.web.cern.ch/fccsw/tutorials/DRD6_2025_Ancona/simpleCalo_simulation.root
+    )
+else()
+    message(STATUS "File already exists: ${SIM_FILE}, skipping download.")
+endif()
+
 add_subdirectory(EventStats)
 add_subdirectory(MoliereRadiusFunctional)
 add_subdirectory(RandomNoiseDigitizer)
