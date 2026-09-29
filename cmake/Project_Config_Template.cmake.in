@@ -12,6 +12,7 @@ find_dependency(ROOT COMPONENTS RIO Tree)
 find_dependency(Gaudi)
 find_dependency(EDM4HEP)
 find_dependency(k4FWCore)
+find_dependency(DD4hep)
 
 include("${CMAKE_CURRENT_LIST_DIR}/@CMAKE_PROJECT_NAME@Targets.cmake")
 

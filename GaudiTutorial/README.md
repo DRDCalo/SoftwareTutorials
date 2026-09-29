@@ -27,6 +27,24 @@ This README contains a short description for each of the hosted exercises.
 The exercises run on data that has been created with with the *simplecalo* calorimeter from the **DD4hepTutorials** exercises.
 An example data file will be downloaded automatically when compiling the repository.
 
+## Compilation
+
+This directory is a standalone CMake project, so only the Gaudi tutorials can
+be built. On an AlmaLinux 9 machine with `/cvmfs` mounted, run the following
+from this directory (or from the root of a standalone `GaudiTutorial`
+checkout):
+
+```bash
+source /cvmfs/sw.hsf.org/key4hep/setup.sh
+k4_local_repo
+mkdir build install
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=../install
+make install -j6
+```
+
+Run `k4_local_repo` again from this directory in every new shell.
+
 ## EventStats
 
 The goal of this exercise is to become familiar with the Gaudi steering file.

@@ -16,13 +16,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from pathlib import Path
+
 from Gaudi.Configuration import INFO
 from k4FWCore import IOSvc, ApplicationMgr
 from Configurables import EventDataSvc, AuditorSvc, ChronoAuditor
 
+data_dir = Path(__file__).resolve().parents[2] / "data"
+
 io_svc = IOSvc("IOSvc")
-io_svc.Input =  "../../data/simpleCalo_simulation.root"
-io_svc.Output = "../../data/simpleCalo_eventStats.root"
+io_svc.Input = str(data_dir / "simpleCalo_simulation.root")
+io_svc.Output = str(data_dir / "simpleCalo_eventStats.root")
+
+# The following would also work if k4run is called from EventStats/options:
+# io_svc.Input = "../../data/simpleCalo_simulation.root"
+# io_svc.Input = "../../data/simpleCalo_simulation.root"
 
 chra = ChronoAuditor()
 audsvc = AuditorSvc()

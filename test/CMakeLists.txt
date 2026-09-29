@@ -18,16 +18,16 @@ limitations under the License.
 ]]
 
 add_test(NAME test_EventStats
-                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                COMMAND k4run GaudiTutorial/EventStats/options/runEventStatsSolution.py --IOSvc.Input ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root --IOSvc.Output ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_eventStats.root)
+                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/GaudiTutorial/data
+                COMMAND k4run ${PROJECT_SOURCE_DIR}/GaudiTutorial/EventStats/options/runEventStatsSolution.py --IOSvc.Input ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root --IOSvc.Output ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_eventStats.root)
 
 add_test(NAME test_MoliereRadius
-                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                COMMAND k4run GaudiTutorial/MoliereRadiusFunctional/options/runMoliereRadiusSolution.py --IOSvc.Input ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root --IOSvc.Output ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_moliereRadius.root)
+                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/GaudiTutorial/data
+                COMMAND k4run ${PROJECT_SOURCE_DIR}/GaudiTutorial/MoliereRadiusFunctional/options/runMoliereRadiusSolution.py --IOSvc.Input ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root --IOSvc.Output ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_moliereRadius.root)
 
 add_test(NAME test_RandomNoiseDigitizer
-                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                COMMAND k4run GaudiTutorial/RandomNoiseDigitizer/options/runRandomNoiseDigitizerSolution.py --IOSvc.Input ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root --IOSvc.Output ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_noiseDigitizer.root)
+                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/GaudiTutorial/data
+                COMMAND k4run ${PROJECT_SOURCE_DIR}/GaudiTutorial/RandomNoiseDigitizer/options/runRandomNoiseDigitizerSolution.py --IOSvc.Input ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root --IOSvc.Output ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_noiseDigitizer.root)
 
 # For LD_LIBRARY_PATH
 # ${PROJECT_BINARY_DIR}                                         # The files <plugins>.components and <plugins>.confdb are here
@@ -44,22 +44,6 @@ add_test(NAME test_RandomNoiseDigitizer
 # after genConfDir has been populated by Gaudi
 # See, for example:
 # https://github.com/key4hep/k4FWCore/blob/42497b71c23425a3a26648f30a1285a499dcda28/test/k4FWCoreTest/CMakeLists.txt#L71
-
-
-execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
-    ${PROJECT_SOURCE_DIR}/GaudiTutorial/data)
-
-set(SIM_FILE ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root)
-
-if(NOT EXISTS ${SIM_FILE})
-    message(STATUS "Downloading simpleCalo_simulation.root ...")
-    execute_process(
-        COMMAND wget -O ${SIM_FILE} https://fccsw.web.cern.ch/fccsw/tutorials/DRD6_2025_Ancona/simpleCalo_simulation.root
-    )
-else()
-    message(STATUS "File already exists: ${SIM_FILE}, skipping download.")
-endif()
-
 
 get_filename_component(CURRENT_DIR_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 

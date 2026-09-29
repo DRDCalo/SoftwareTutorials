@@ -17,9 +17,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ]]
 CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
-project(DD4hepTutorials)
+project(DD4hepTutorials LANGUAGES CXX)
 
 include(GNUInstallDirs)
+
+# Keep this directory self-contained: these dependencies and settings must be
+# available both when DD4hepTutorials is the top-level project and when it is
+# included by SoftwareTutorials.
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(DD4hep REQUIRED)
 
