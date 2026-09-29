@@ -48,6 +48,10 @@ random_noise_digitizer = RandomNoiseDigitizer("RandomNoiseDigitizer",
                                 OutputLevel=INFO
                                 )
 
+# TODO: Add the Moliere radius algorithm to the steering file and configure it
+# to use the output of RandomNoiseDigitizer as input
+
+# TODO: Add The Moliere radius algorithm to top algorithms list in the ApplicationMgr
 app_mgr = ApplicationMgr(
     TopAlg=[eventStats_functional, random_noise_digitizer],
     EvtSel='NONE',

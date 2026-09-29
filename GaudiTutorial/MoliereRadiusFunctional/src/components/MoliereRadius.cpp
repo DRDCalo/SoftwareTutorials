@@ -66,14 +66,15 @@ public:
     [[maybe_unused]] double barycentre_y = InputBarycenter[1]->at(0);
     [[maybe_unused]] double totalEnergy = InputTotalEnergy.at(0);
 
+    // TO DO:
     // Step 1: Calculate radius for each hit and store with energy
     // You can use the HitData struct defined below to store the relevant information
-    //
+    // TO DO:
     // Step 2: Sort hits by radius
-    //
+    // TO DO:
     // Step 3: Loop over the sorted list, accumulate energy and find radius at 90% of total energy
 
-    // How to loop over the input hits:
+    // HINT: How to loop over the input hits:
     for (const auto& hit : InputCaloHitCollection) {
     }
 
