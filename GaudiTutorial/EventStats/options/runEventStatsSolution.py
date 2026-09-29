@@ -28,6 +28,10 @@ io_svc = IOSvc("IOSvc")
 io_svc.Input = str(data_dir / "simpleCalo_simulation.root")
 io_svc.Output = str(data_dir / "simpleCalo_eventStats.root")
 
+# The following would also work if k4run is called from EventStats/options:
+# io_svc.Input = "../../data/simpleCalo_simulation.root"
+# io_svc.Input = "../../data/simpleCalo_simulation.root"
+
 chra = ChronoAuditor()
 audsvc = AuditorSvc()
 audsvc.Auditors = [chra]
