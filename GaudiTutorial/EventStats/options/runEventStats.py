@@ -76,7 +76,7 @@ eventStats_functional = EventStats(
 # 1. Fill in the missing values (??????)
 
 app_mgr = ApplicationMgr(
-    TopAlg = [??????],
+    TopAlg = [??????],                    # TODO: Add the algorithm to the list of top algorithms
     EvtSel = 'NONE',
     EvtMax = -1,
     ExtSvc = [EventDataSvc("EventDataSvc"), audsvc],

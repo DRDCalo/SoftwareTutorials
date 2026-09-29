@@ -57,9 +57,9 @@ public:
 
     // Retrieve the UniqueIDGenSvc for generating reproducable random seed
     m_uniqueIDSvc =
-        serviceLocator()->service(""); // Replace with the value from the property for the UniqueIDGenSvc name
+        serviceLocator()->service(""); // TODO: replace with the value from the property for the UniqueIDGenSvc name
     if (!m_uniqueIDSvc) {
-      error() << "Unable to locate UniqueIDGenSvc with name: " << /* PROPERTY.value() << */ endmsg;
+      error() << "Unable to locate UniqueIDGenSvc with name: " << /* PROPERTY.value() << */ endmsg;  // TODO: replace with the value from the property for the UniqueIDGenSvc name
       return StatusCode::FAILURE;
     }
 
@@ -82,7 +82,7 @@ public:
     // Create the random distributions for smearing the hit energy
     // [[maybe_unused]] used to avoid downstream build failures due to unused variables
     [[maybe_unused]] std::normal_distribution<double> gaussian_noise{
-        0.0, 0.0}; // Replace with mean and width from properties
+        0.0, 0.0}; // TODO: Replace with mean and width from properties
 
     // Loop over the input hits
     for (const auto& hit : InputCaloSimHitCollection) {
@@ -91,7 +91,7 @@ public:
       [[maybe_unused]] double noise = gaussian_noise(random_engine);
 
       digihit.setCellID(hit.getCellID());
-      // Use the EDM4hep yaml file to "guess" the names of the getter and setter functions
+      // TODO: Use the EDM4hep yaml file to "guess" the names of the getter and setter functions
       // to define the remaining members of the CalorimeterHit class
     }
 
@@ -101,9 +101,9 @@ public:
 
 private:
   SmartIF<IUniqueIDGenSvc> m_uniqueIDSvc{nullptr};
-  // Create a Gaudi::Property for the UniqueIDGenSvc name (specified in the steering file)
+  // TODO: Create a Gaudi::Property for the UniqueIDGenSvc name (specified in the steering file)
 
-  // Create two Gaudi::Property members for the noise mean and width
+  // TODO: Create two Gaudi::Property members for the noise mean and width
 };
 
 DECLARE_COMPONENT(RandomNoiseDigitizer)
