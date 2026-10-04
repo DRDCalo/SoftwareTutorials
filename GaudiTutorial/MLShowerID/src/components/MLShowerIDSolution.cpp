@@ -37,27 +37,32 @@
 #include <tuple>
 #include <vector>
 
-struct MLShowerID final
+struct MLShowerIDSolution final
     : k4FWCore::MultiTransformer<std::tuple<edm4hep::CalorimeterHitCollection, edm4hep::ClusterCollection>(
           const EventContext&, const edm4hep::SimCalorimeterHitCollection&)> {
 public:
-  // TODO hands-on: write input and output names
-  MLShowerID(const std::string& name, ISvcLocator* svcLoc)
-      : MultiTransformer(name, svcLoc, {KeyValues("namexxx", {"simplecaloRO"})},
-                         {KeyValues("namexxxx", {"simpleCaloHits"}),
-                          KeyValues("namexxxxx", {"CaloClustersWithID"})}) {}
+  MLShowerIDSolution(const std::string& name, ISvcLocator* svcLoc)
+      : MultiTransformer(name, svcLoc, {KeyValues("InputSimCaloHitCollection", {"simplecaloRO"})},
+                         {KeyValues("OutputCaloHitCollection", {"simpleCaloHits"}),
+                          KeyValues("OutputClusterCollection", {"CaloClustersWithID"})}) {}
 
   StatusCode initialize() override {
-    info() << "MLShowerID will read ONNX model from: " << m_modelPath.value() << endmsg;
+    info() << "MLShowerIDSolution will read ONNX model from: " << m_modelPath.value() << endmsg;
 
     try {
       m_memoryInfo =
           std::make_unique<Ort::MemoryInfo>(Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault));
-      m_env = std::make_unique<Ort::Env>(ORT_LOGGING_LEVEL_WARNING, "MLShowerID");
+      m_env = std::make_unique<Ort::Env>(ORT_LOGGING_LEVEL_WARNING, "MLShowerIDSolution");
 
       Ort::SessionOptions sessionOptions;
       sessionOptions.SetIntraOpNumThreads(1);
       sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_BASIC);
+
+      // Support GPU execution using CUDA provider
+      // OrtCUDAProviderOptions cudaOptions{};
+      // cudaOptions.device_id = 0;  // Set the GPU device ID if you have multiple GPUs
+      // sessionOptions.AppendExecutionProvider_CUDA(cudaOptions);
+
       m_session = std::make_unique<Ort::Session>(*m_env, m_modelPath.value().c_str(), sessionOptions);
 
       if (m_session->GetInputCount() != 2 || m_session->GetOutputCount() != 1) {
@@ -113,17 +118,25 @@ public:
     edm4hep::CalorimeterHitCollection caloHits;
     edm4hep::ClusterCollection clusters;
 
+    double hitEnergy = 0.0;
     double totalEnergy = 0.0;
+    edm4hep::Vector3f hitPosition{0.0F, 0.0F, 0.0F};
     edm4hep::Vector3f weightedPosition{0.0F, 0.0F, 0.0F};
 
     for (const auto& simHit : simHits) {
-      // TODO hands-on: create a CaloHit for each SimHit, copy the cellID, energy, position
       auto caloHit = caloHits.create();
+      caloHit.setCellID(simHit.getCellID());
+      caloHit.setEnergy(simHit.getEnergy());
+      caloHit.setPosition(simHit.getPosition());
 
-      // TODO hands-on: compute the total "cluster" energy and the energy-weighted position 
-
+      hitPosition = simHit.getPosition();
+      hitEnergy = simHit.getEnergy();
+      totalEnergy += hitEnergy;
+      weightedPosition.x += hitEnergy * hitPosition.x;
+      weightedPosition.y += hitEnergy * hitPosition.y;
+      weightedPosition.z += hitEnergy * hitPosition.z;
     }
-    // this I would leave as hint for the previous exercise 
+
     if (totalEnergy > 0.0) {
       weightedPosition.x /= totalEnergy;
       weightedPosition.y /= totalEnergy;
@@ -135,9 +148,9 @@ public:
     auto cluster = clusters.create();
     cluster.setEnergy(static_cast<float>(totalEnergy));
     cluster.setPosition(weightedPosition);
-
-    // TODO hands-on: add the CaloHits to the cluster
-
+    for (const auto& hit : caloHits) {
+      cluster.addToHits(hit);
+    }
     // Keep this order synchronized with the ONNX scores output:
     // shapeParameters[0] = electron score, shapeParameters[1] = hadronic score.
     cluster.addToShapeParameters(scores[0]);
@@ -204,8 +217,10 @@ private:
     const auto* scores = outputTensors.front().GetTensorData<float>();
     return {scores[0], scores[1]};
   }
-  // TODO hands-on: write the gaudi property for ONNX model path
-  Gaudi::Property<std::string> m_modelPath; 
+
+  Gaudi::Property<std::string> m_modelPath{
+      this, "ONNXModelPath", "GaudiTutorial/modeldev/pointnet_outputs/pointnet_simplecalo.onnx",
+      "Path to the Tiny PointNet ONNX model"};
 
   std::size_t m_maxPoints{0};
 
@@ -214,4 +229,4 @@ private:
   std::unique_ptr<Ort::Session> m_session{nullptr};
 };
 
-DECLARE_COMPONENT(MLShowerID)
+DECLARE_COMPONENT(MLShowerIDSolution)
