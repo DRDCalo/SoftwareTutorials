@@ -35,21 +35,48 @@ find_package(ROOT REQUIRED COMPONENTS RIO Tree Hist)
 find_package(EDM4HEP REQUIRED)
 find_package(k4FWCore REQUIRED)
 find_package(DD4hep REQUIRED)
+find_package(onnxruntime CONFIG REQUIRED)
+
 
 # The exercises and their tests use this input file.  Keep the download in
 # GaudiTutorial so it is also available when this directory is configured as a
 # standalone project.
 set(SIM_FILE ${CMAKE_CURRENT_SOURCE_DIR}/data/simpleCalo_simulation.root)
+set(ML_PI_FILE ${CMAKE_CURRENT_SOURCE_DIR}/data/clusterID_pi-_1-20GeV_eval.root)
+set(ML_E_FILE ${CMAKE_CURRENT_SOURCE_DIR}/data/clusterID_e-_1-20GeV_eval.root)
+set(ML_MODEL ${CMAKE_CURRENT_SOURCE_DIR}/data/pointnet_simplecalo.onnx)
 
-if(NOT EXISTS ${SIM_FILE})
-    message(STATUS "Downloading simpleCalo_simulation.root ...")
-    file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data)
-    execute_process(
-        COMMAND wget -O ${SIM_FILE} https://fccsw.web.cern.ch/fccsw/tutorials/DRD6_2025_Ancona/simpleCalo_simulation.root
-    )
-else()
-    message(STATUS "File already exists: ${SIM_FILE}, skipping download.")
-endif()
+function(download_if_missing url destination)
+    if(EXISTS "${destination}")
+        message(STATUS "File already exists: ${destination}, skipping download.")
+        return()
+    endif()
+
+    get_filename_component(destination_dir "${destination}" DIRECTORY)
+    file(MAKE_DIRECTORY "${destination_dir}")
+
+    set(temp_file "${destination}.part")
+    file(DOWNLOAD "${url}" "${temp_file}"
+         STATUS download_status
+         TIMEOUT 120
+         TLS_VERIFY ON)
+
+    list(GET download_status 0 status_code)
+    if(NOT status_code EQUAL 0)
+        list(GET download_status 1 status_message)
+        file(REMOVE "${temp_file}")
+        message(FATAL_ERROR "Download failed: ${url}: ${status_message}")
+    endif()
+
+    file(RENAME "${temp_file}" "${destination}")
+endfunction()
+
+set(BASE_URL "https://fccsw.web.cern.ch/fccsw/tutorials/DRD6_2025_Ancona")
+
+download_if_missing("${BASE_URL}/simpleCalo_simulation.root" "${SIM_FILE}")
+download_if_missing("${BASE_URL}/clusterID_pi-_1-20GeV_eval.root" "${ML_PI_FILE}")
+download_if_missing("${BASE_URL}/clusterID_e-_1-20GeV_eval.root" "${ML_E_FILE}")
+download_if_missing("${BASE_URL}/pointnet_simplecalo.onnx" "${ML_MODEL}")
 
 add_subdirectory(EventStats)
 add_subdirectory(MoliereRadiusFunctional)
