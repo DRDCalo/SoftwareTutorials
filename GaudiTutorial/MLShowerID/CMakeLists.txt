@@ -16,7 +16,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ]]
-file(GLOB _plugin_sources src/components/*.cpp)
+# Reconfigure when exercise or solution component sources are added or removed.
+file(GLOB _plugin_sources CONFIGURE_DEPENDS src/components/*.cpp)
 gaudi_add_module(MLShowerIDPlugins
                  SOURCES ${_plugin_sources}
                  LINK Gaudi::GaudiKernel
