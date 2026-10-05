@@ -59,7 +59,9 @@ public:
     m_uniqueIDSvc =
         serviceLocator()->service(""); // TODO: replace with the value from the property for the UniqueIDGenSvc name
     if (!m_uniqueIDSvc) {
-      error() << "Unable to locate UniqueIDGenSvc with name: " << /* PROPERTY.value() << */ endmsg;  // TODO: replace with the value from the property for the UniqueIDGenSvc name
+      error() << "Unable to locate UniqueIDGenSvc with name: "
+              << /* PROPERTY.value() << */ endmsg; // TODO: replace with the value from the property for the
+                                                   // UniqueIDGenSvc name
       return StatusCode::FAILURE;
     }
 

@@ -64,4 +64,4 @@ Solution files are provided.
 
 ## MLShowerID
 
-A template of implementing the Machine Learning model with ONNX into Key4hep. The model is trained individually. 
+A template of implementing the Machine Learning model with ONNX into Key4hep. The model is trained individually.
