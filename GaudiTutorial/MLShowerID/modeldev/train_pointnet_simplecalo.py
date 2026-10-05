@@ -133,6 +133,11 @@ def main() -> None:
     normalizer = fit_normalizer(points, mask, train_indices)
     points = normalizer.apply(points, mask)
 
+    # Normalized point clouds for evaluate_pointnet_simplecalo.py, which
+    # reproduces the validation split from these arrays and the seed.
+    npz_path = output_dir / "simplecalo_pointcloud.npz"
+    np.savez_compressed(npz_path, points=points, mask=mask, labels=labels)
+
     train_loader = DataLoader(
         SimpleCaloDataset(points[train_indices], mask[train_indices], labels[train_indices]),
         batch_size=args.batch_size,
@@ -179,6 +184,7 @@ def main() -> None:
     print(f"saved state_dict: {state_path}")
     print(f"saved torchscript: {traced_path}")
     print(f"saved onnx: {onnx_path}")
+    print(f"saved point clouds: {npz_path}")
 
 
 if __name__ == "__main__":
