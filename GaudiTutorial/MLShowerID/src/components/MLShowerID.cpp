@@ -1,4 +1,23 @@
 /*
+ * Copyright (c) 2020-2024 Key4hep-Project.
+ *
+ * This file is part of Key4hep.
+ * See https://key4hep.github.io/key4hep-doc/ for further info.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
  * Gaudi processor for SimpleCalo PointNet shower identification.
  *
  * The deployed ONNX model accepts raw (x, y, z, energy) hit features and
@@ -44,8 +63,7 @@ public:
   // TODO hands-on: write input and output names
   MLShowerID(const std::string& name, ISvcLocator* svcLoc)
       : MultiTransformer(name, svcLoc, {KeyValues("namexxx", {"simplecaloRO"})},
-                         {KeyValues("namexxxx", {"simpleCaloHits"}),
-                          KeyValues("namexxxxx", {"CaloClustersWithID"})}) {}
+                         {KeyValues("namexxxx", {"simpleCaloHits"}), KeyValues("namexxxxx", {"CaloClustersWithID"})}) {}
 
   StatusCode initialize() override {
     info() << "MLShowerID will read ONNX model from: " << m_modelPath.value() << endmsg;
@@ -84,8 +102,8 @@ public:
       //   mask:   [batch, maxPoints], so rank is 2.
       //   scores: [batch, 2], so rank is 2 and dimension 1 contains the
       //           normalized electron and hadronic probabilities.
-      if (pointsShape.size() != 3 || pointsShape[2] != 4 || maskShape.size() != 2 ||
-          scoresShape.size() != 2 || scoresShape[1] != 2) {
+      if (pointsShape.size() != 3 || pointsShape[2] != 4 || maskShape.size() != 2 || scoresShape.size() != 2 ||
+          scoresShape[1] != 2) {
         error() << "Unexpected ONNX tensor shapes" << endmsg;
         return StatusCode::FAILURE;
       }
@@ -108,8 +126,7 @@ public:
   }
 
   std::tuple<edm4hep::CalorimeterHitCollection, edm4hep::ClusterCollection>
-  operator()(const EventContext& eventContext,
-             const edm4hep::SimCalorimeterHitCollection& simHits) const override {
+  operator()(const EventContext& eventContext, const edm4hep::SimCalorimeterHitCollection& simHits) const override {
     edm4hep::CalorimeterHitCollection caloHits;
     edm4hep::ClusterCollection clusters;
 
@@ -120,10 +137,9 @@ public:
       // TODO hands-on: create a CaloHit for each SimHit, copy the cellID, energy, position
       auto caloHit = caloHits.create();
 
-      // TODO hands-on: compute the total "cluster" energy and the energy-weighted position 
-
+      // TODO hands-on: compute the total "cluster" energy and the energy-weighted position
     }
-    // this I would leave as hint for the previous exercise 
+    // this I would leave as hint for the previous exercise
     if (totalEnergy > 0.0) {
       weightedPosition.x /= totalEnergy;
       weightedPosition.y /= totalEnergy;
@@ -185,8 +201,8 @@ private:
     const std::array<int64_t, 2> maskShape{1, static_cast<int64_t>(maxPoints)};
     std::vector<Ort::Value> inputTensors;
     inputTensors.reserve(2);
-    inputTensors.emplace_back(Ort::Value::CreateTensor<float>(
-        *m_memoryInfo, points.data(), points.size(), pointsShape.data(), pointsShape.size()));
+    inputTensors.emplace_back(Ort::Value::CreateTensor<float>(*m_memoryInfo, points.data(), points.size(),
+                                                              pointsShape.data(), pointsShape.size()));
     inputTensors.emplace_back(
         Ort::Value::CreateTensor<bool>(*m_memoryInfo, mask.get(), maxPoints, maskShape.data(), maskShape.size()));
 
@@ -205,7 +221,7 @@ private:
     return {scores[0], scores[1]};
   }
   // TODO hands-on: write the gaudi property for ONNX model path
-  Gaudi::Property<std::string> m_modelPath; 
+  Gaudi::Property<std::string> m_modelPath;
 
   std::size_t m_maxPoints{0};
 
