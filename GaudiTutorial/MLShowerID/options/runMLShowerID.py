@@ -24,10 +24,7 @@ io_svc = IOSvc("IOSvc")
 io_svc.Input = "../../data/clusterID_e-_1-20GeV_eval.root"
 io_svc.Output = "mlshowerid_output_e-_1-20GeV.root"
 
-from Configurables import MLShowerID, MLShowerIDSolution
-
-# After you finish all hands-on.
-# Otherwise, you can switch to MLShowerIDSolution for the Solution processor
+from Configurables import MLShowerID
 ml_shower_id = MLShowerID(
     "MLShowerID",
     InputSimCaloHitCollection=["simplecaloRO"],
