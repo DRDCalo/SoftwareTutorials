@@ -64,4 +64,29 @@ Solution files are provided.
 
 ## MLShowerID
 
-A template of implementing the Machine Learning model with ONNX into Key4hep. The model is trained individually.
+A Gaudi processor for implementing a Tiny PointNet ONNX inference on SimpleCalo showers.
+
+The model is trainned on top 1024 hits ordered by decreasing energy. 
+Those hits are treated as point cloud, with dim-4 features (x, y, z, energy). 
+After this classification model, two scores are returned: EM score and hadronic score. 
+
+The trained ONNX model is loaded once during algorithm initialization. 
+Based on the training setup, its expected interface is: 
+```text
+points: float32 [batch, 1024, 4]
+mask:   bool    [batch, 1024]
+scores: float32 [batch, 2]
+```
+
+
+The processing flow is:
+
+```text
+SimCalorimeterHitCollection
+  -> raw (x, y, z, energy) point tensor and validity mask
+  -> ONNX model with embedded training normalization
+  -> ONNX softmax scores [EM, Hadronic]
+  -> one output Cluster containing all converted CalorimeterHits
+```
+Two scores are stored in the shape parameters: ShapeParameters[0] as EM score, ShapeParameters[1] as hadronic score. 
+
