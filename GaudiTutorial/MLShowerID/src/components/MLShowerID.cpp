@@ -137,9 +137,9 @@ public:
       // TODO hands-on: create a CaloHit for each SimHit, copy the cellID, energy, position
       auto caloHit = caloHits.create();
 
-      // TODO hands-on: compute the total "cluster" energy and the energy-weighted position
-    }
-    // this I would leave as hint for the previous exercise
+      // TODO hands-on: compute the total "cluster" energy and the energy-weighted position 
+
+    } 
     if (totalEnergy > 0.0) {
       weightedPosition.x /= totalEnergy;
       weightedPosition.y /= totalEnergy;
