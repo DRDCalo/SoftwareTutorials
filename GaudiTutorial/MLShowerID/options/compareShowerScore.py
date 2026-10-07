@@ -93,7 +93,7 @@ def plot_scores(stored, inferred):
         ):
             histogram = ROOT.TH1D(
                 f"h_{sample}_shape_parameter_{index}",
-                f";{name.replace('_', ' ')}", 50, 0.0, 1.0,
+                f";{name.replace('_', ' ')}", 50, -0.1, 1.1,
             )
             histogram.SetDirectory(0)
             histogram.SetStats(0)

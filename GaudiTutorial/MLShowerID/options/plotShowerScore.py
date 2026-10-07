@@ -37,7 +37,7 @@ def read_histograms(input_file, sample, collection):
         histogram = ROOT.TH1D(
             f"h_{sample}_shape_parameter_{index}",
             f";{score_name}",
-            50, 0.0, 1.0,
+            50, -0.1, 1.1,
         )
         histogram.SetStats(0)
         histogram.Sumw2()
