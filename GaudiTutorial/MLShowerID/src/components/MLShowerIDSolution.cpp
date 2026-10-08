@@ -144,11 +144,11 @@ public:
     for (const auto& simHit : simHits) {
       auto caloHit = caloHits.create();
       caloHit.setCellID(simHit.getCellID());
-      caloHit.setEnergy(simHit.getEnergy());
-      caloHit.setPosition(simHit.getPosition());
-
-      hitPosition = simHit.getPosition();
       hitEnergy = simHit.getEnergy();
+      caloHit.setEnergy(hitEnergy);
+      hitPosition = simHit.getPosition();
+      caloHit.setPosition(hitPosition);
+
       totalEnergy += hitEnergy;
       weightedPosition.x += hitEnergy * hitPosition.x;
       weightedPosition.y += hitEnergy * hitPosition.y;
