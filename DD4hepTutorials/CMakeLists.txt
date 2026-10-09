@@ -16,17 +16,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ]]
-CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
-project(DD4hepTutorials LANGUAGES CXX)
-
 include(GNUInstallDirs)
-
-# Keep this directory self-contained: these dependencies and settings must be
-# available both when DD4hepTutorials is the top-level project and when it is
-# included by SoftwareTutorials.
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(DD4hep REQUIRED)
 
@@ -35,13 +25,13 @@ dd4hep_configure_output()
 
 # Collect all source files
 set(SOURCES
-  ${PROJECT_SOURCE_DIR}/simplecalo1/src/simplecalo1.cpp
-  ${PROJECT_SOURCE_DIR}/simplecalo2/src/simplecalo2.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/simplecalo1/src/simplecalo1.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/simplecalo2/src/simplecalo2.cpp
 )
 add_compile_options(-Wno-unused-variable)
 
 # Create a single plugin
-dd4hep_add_plugin(${PROJECT_NAME} SOURCES ${SOURCES} USES
+dd4hep_add_plugin(DD4hepTutorials SOURCES ${SOURCES} USES
   DD4hep::DDCore
   DD4hep::DDCond
   ROOT::Core
@@ -51,9 +41,9 @@ dd4hep_add_plugin(${PROJECT_NAME} SOURCES ${SOURCES} USES
 )
 
 # Add both include directories
-target_include_directories(${PROJECT_NAME} PRIVATE
-  ${PROJECT_SOURCE_DIR}/simplecalo1/include
-  ${PROJECT_SOURCE_DIR}/simplecalo2/include
+target_include_directories(DD4hepTutorials PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/simplecalo1/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/simplecalo2/include
 )
 
 add_subdirectory(sdaction)
