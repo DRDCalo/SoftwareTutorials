@@ -29,21 +29,10 @@ An example data file will be downloaded automatically when compiling the reposit
 
 ## Compilation
 
-This directory is a standalone CMake project, so only the Gaudi tutorials can
-be built. On an AlmaLinux 9 machine with `/cvmfs` mounted, run the following
-from this directory (or from the root of a standalone `GaudiTutorial`
-checkout):
-
-```bash
-source /cvmfs/sw.hsf.org/key4hep/setup.sh
-k4_local_repo
-mkdir build install
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=../install
-make install -j6
-```
-
-Run `k4_local_repo` again from this directory in every new shell.
+This directory is part of the single `SoftwareTutorials` CMake project and is
+not built on its own. To build only the Gaudi tutorials, follow the
+instructions in the [top-level README](../README.md) and configure with
+`-DSOFTWARETUTORIALS_BUILD_DD4HEPTUTORIALS=OFF`.
 
 ## EventStats
 

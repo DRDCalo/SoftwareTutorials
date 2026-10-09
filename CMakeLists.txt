@@ -32,10 +32,19 @@ include(cmake/Key4hepConfig.cmake)
 
 include(GNUInstallDirs)
 
-# Each tutorial declares its own dependencies so that it can also be configured
-# directly from its subdirectory.
-add_subdirectory(GaudiTutorial)
-add_subdirectory(DD4hepTutorials)
+option(SOFTWARETUTORIALS_BUILD_GAUDITUTORIAL "Build the GaudiTutorial directory" ON)
+option(SOFTWARETUTORIALS_BUILD_DD4HEPTUTORIALS "Build the DD4hepTutorials directory" ON)
+
+if(NOT SOFTWARETUTORIALS_BUILD_GAUDITUTORIAL AND NOT SOFTWARETUTORIALS_BUILD_DD4HEPTUTORIALS)
+  message(FATAL_ERROR "Both SOFTWARETUTORIALS_BUILD_GAUDITUTORIAL and SOFTWARETUTORIALS_BUILD_DD4HEPTUTORIALS are OFF: at least one must be ON.")
+endif()
+
+if(SOFTWARETUTORIALS_BUILD_GAUDITUTORIAL)
+  add_subdirectory(GaudiTutorial)
+endif()
+if(SOFTWARETUTORIALS_BUILD_DD4HEPTUTORIALS)
+  add_subdirectory(DD4hepTutorials)
+endif()
 
 include(CTest)
 if(BUILD_TESTING)
