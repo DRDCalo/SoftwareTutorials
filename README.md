@@ -11,9 +11,9 @@ The tutorials can be completed by following the presentation slides linked in th
 
 ## Compilation
 
-The tutorials can be compiled either together or independently. They require
-the Key4hep environment on an AlmaLinux 9 machine with `/cvmfs` mounted, such
-as lxplus.
+The repository is a single CMake project that builds both `DD4hepTutorials`
+and `GaudiTutorial`. It requires the Key4hep environment on an AlmaLinux 9
+machine with `/cvmfs` mounted, such as lxplus.
 
 First, clone the repository:
 
@@ -22,9 +22,7 @@ git clone https://github.com/DRD6/SoftwareTutorials.git
 cd SoftwareTutorials
 ```
 
-### Build both tutorials together
-
-Run these commands from the `SoftwareTutorials` directory:
+Then build and install everything:
 
 ```bash
 source /cvmfs/sw.hsf.org/key4hep/setup.sh
@@ -35,37 +33,15 @@ cmake .. -DCMAKE_INSTALL_PREFIX=../install
 make install -j6
 ```
 
-This builds and installs both `DD4hepTutorials` and `GaudiTutorial`.
-
-### Build only DD4hepTutorials
-
-Run these commands from the `SoftwareTutorials` directory:
+To build only one of the two directories, disable the other one at configure
+time:
 
 ```bash
-cd DD4hepTutorials
-source /cvmfs/sw.hsf.org/key4hep/setup.sh
-k4_local_repo
-mkdir build install
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=../install
-make install -j6
-```
+# Build only DD4hepTutorials
+cmake .. -DCMAKE_INSTALL_PREFIX=../install -DSOFTWARETUTORIALS_BUILD_GAUDITUTORIAL=OFF
 
-The same commands work when `DD4hepTutorials` is checked out as a separate
-repository: run them from its repository root, omitting the `cd` command.
-
-### Build only GaudiTutorial
-
-Run these commands from the `SoftwareTutorials` directory:
-
-```bash
-cd GaudiTutorial
-source /cvmfs/sw.hsf.org/key4hep/setup.sh
-k4_local_repo
-mkdir build install
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=../install
-make install -j6
+# Build only GaudiTutorial
+cmake .. -DCMAKE_INSTALL_PREFIX=../install -DSOFTWARETUTORIALS_BUILD_DD4HEPTUTORIALS=OFF
 ```
 
 The `k4_local_repo` command configures the environment so that the locally

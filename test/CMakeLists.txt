@@ -17,6 +17,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ]]
 
+# All current tests run the GaudiTutorial exercises via k4run and need its
+# plugins, so they are only defined when that directory is built.
+if(SOFTWARETUTORIALS_BUILD_GAUDITUTORIAL)
+
 add_test(NAME test_EventStats
                 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/GaudiTutorial/data
                 COMMAND k4run ${PROJECT_SOURCE_DIR}/GaudiTutorial/EventStats/options/runEventStatsSolution.py --IOSvc.Input ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_simulation.root --IOSvc.Output ${PROJECT_SOURCE_DIR}/GaudiTutorial/data/simpleCalo_eventStats.root)
@@ -72,3 +76,5 @@ set_tests_properties(${test_names} PROPERTIES ENVIRONMENT "${test_environment}")
 message(STATUS "================ Test Environment ================")
 message(STATUS "${test_environment}")
 message(STATUS "=================================================")
+
+endif()

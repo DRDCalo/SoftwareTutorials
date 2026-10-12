@@ -29,21 +29,10 @@ For instructions on **simplecalo1** and **simplecalo2** follow [this presentatio
 
 ## Compilation
 
-This directory is a standalone CMake project, so only the DD4hep tutorials can
-be built. On an AlmaLinux 9 machine with `/cvmfs` mounted, run the following
-from this directory (or from the root of a standalone `DD4hepTutorials`
-checkout):
-
-```bash
-source /cvmfs/sw.hsf.org/key4hep/setup.sh
-k4_local_repo
-mkdir build install
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=../install
-make install -j6
-```
-
-Run `k4_local_repo` again from this directory in every new shell.
+This directory is part of the single `SoftwareTutorials` CMake project and is
+not built on its own. To build only the DD4hep tutorials, follow the
+instructions in the [top-level README](../README.md) and configure with
+`-DSOFTWARETUTORIALS_BUILD_GAUDITUTORIAL=OFF`.
 
 ## Previous editions of this tutorial
 - April 2026, DRDCalo Collaboration Meeting [presentation](https://indico.cern.ch/event/1618975/sessions/635708/attachments/3252510/5805581/DRDCaloDD4hepTutorial_April2026.pdf)

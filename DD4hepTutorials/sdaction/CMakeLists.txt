@@ -16,14 +16,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ]]
-project(simplecalo)
-
 file(GLOB sources
-  ${PROJECT_SOURCE_DIR}/src/*.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
 
 file(GLOB headers
-  ${PROJECT_SOURCE_DIR}/include/*.hh
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hh
 )
 
 add_library(sdaction SHARED ${sources} ${headers})
@@ -43,7 +41,7 @@ target_link_libraries(
 
 dd4hep_generate_rootmap(sdaction)
 
-install(TARGETS sdaction EXPORT DetectorTargets
+install(TARGETS sdaction EXPORT ${CMAKE_PROJECT_NAME}Targets
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT shlib
   PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" COMPONENT dev
 )
